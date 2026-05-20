@@ -11,6 +11,7 @@ import AppLayout from "@/components/app-layout"
 import { groupsAPI } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
+import { toast } from "sonner"
 
 export default function StudyGroupDetailPage() {
   const params = useParams()
@@ -85,9 +86,10 @@ export default function StudyGroupDetailPage() {
       await groupsAPI.join(groupId)
       const updatedGroup = await groupsAPI.getById(groupId)
       setGroup(updatedGroup)
+      toast.success("Successfully joined the study group!")
     } catch (err: any) {
       console.error("Failed to join group:", err)
-      alert(err.response?.data?.detail || "Failed to join group")
+      toast.error(err.response?.data?.detail || "Failed to join group")
     } finally {
       setIsJoining(false)
     }

@@ -9,12 +9,12 @@ import AppLayout from "@/components/app-layout"
 import { leaderboardAPI } from "@/lib/api"
 
 const badgeDefinitions = {
-  Initiator: { color: "bg-yellow-500/20", textColor: "text-yellow-600" },
-  "Weekend Warrior": { color: "bg-red-500/20", textColor: "text-red-600" },
-  "Knowledge Seeker": { color: "bg-blue-500/20", textColor: "text-blue-600" },
-  "Team Player": { color: "bg-green-500/20", textColor: "text-green-600" },
-  "Rising Star": { color: "bg-purple-500/20", textColor: "text-purple-600" },
-  "Study Buddy": { color: "bg-cyan-500/20", textColor: "text-cyan-600" },
+  Initiator: { color: "bg-yellow-500/10 dark:bg-yellow-500/20", textColor: "text-yellow-600 dark:text-yellow-400" },
+  "Weekend Warrior": { color: "bg-red-500/10 dark:bg-red-500/20", textColor: "text-red-600 dark:text-red-400" },
+  "Knowledge Seeker": { color: "bg-blue-500/10 dark:bg-blue-500/20", textColor: "text-blue-600 dark:text-blue-400" },
+  "Team Player": { color: "bg-green-500/10 dark:bg-green-500/20", textColor: "text-green-600 dark:text-green-400" },
+  "Rising Star": { color: "bg-purple-500/10 dark:bg-purple-500/20", textColor: "text-purple-600 dark:text-purple-400" },
+  "Study Buddy": { color: "bg-cyan-500/10 dark:bg-cyan-500/20", textColor: "text-cyan-600 dark:text-cyan-400" },
 }
 
 function MedalIcon({ rank }: { rank: number }) {

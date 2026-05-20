@@ -69,7 +69,7 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-5xl leading-3">
+      <div className="max-w-5xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">My Upcoming Study Sessions</h1>
           <p className="text-muted-foreground text-sm mt-1">Your study schedule for the week ahead</p>
@@ -91,7 +91,7 @@ export default function DashboardPage() {
 
         {/* Sessions List */}
         {!loading && !error && upcomingSessions.length > 0 && (
-          <div className="space-y-59">
+          <div className="space-y-6">
             {upcomingSessions.map((session) => (
               <StudySessionCard
                 key={session.id}

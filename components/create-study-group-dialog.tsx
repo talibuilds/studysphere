@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { groupsAPI } from "@/lib/api"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 interface CreateStudyGroupDialogProps {
   open: boolean
@@ -41,7 +42,7 @@ export default function CreateStudyGroupDialog({ open, onOpenChange }: CreateStu
       setFormData({ name: "", subject: "", description: "" })
       router.refresh() // Refresh to show new group (if approved by admin)
       // Show success message
-      alert("Group created successfully! It will appear after admin approval.")
+      toast.success("Group created successfully! It will appear after admin approval.")
     } catch (err: any) {
       console.error("Failed to create group:", err)
       setError(err.response?.data?.detail || "Failed to create group. Please try again.")

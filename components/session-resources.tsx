@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ExternalLink, Plus, Link as LinkIcon, Trash2 } from "lucide-react"
 import { sessionsAPI } from "@/lib/api"
 import { AddResourceDialog } from "@/components/add-resource-dialog"
+import { toast } from "sonner"
 
 interface Resource {
     id: number
@@ -66,7 +67,7 @@ export function SessionResources({
             await sessionsAPI.addResource(sessionId, { title, link })
             await fetchResources()
             setDialogOpen(false)
-            alert("Resource added successfully!")
+            toast.success("Resource added successfully!")
         } catch (err: any) {
             console.error("Failed to add resource:", err)
             throw new Error(err.response?.data?.detail || "Failed to add resource")
@@ -84,10 +85,10 @@ export function SessionResources({
             setDeletingId(resourceId)
             await sessionsAPI.deleteResource(sessionId, resourceId)
             await fetchResources()
-            alert("Resource deleted successfully!")
+            toast.success("Resource deleted successfully!")
         } catch (err: any) {
             console.error("Failed to delete resource:", err)
-            alert(err.response?.data?.detail || "Failed to delete resource")
+            toast.error(err.response?.data?.detail || "Failed to delete resource")
         } finally {
             setDeletingId(null)
         }

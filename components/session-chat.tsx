@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { messagesAPI } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
+import { toast } from "sonner"
 
 interface Message {
     id: string
@@ -82,7 +83,7 @@ export function SessionChat({ sessionId, sessionTitle, attendeesCount }: Session
             setNewMessage("")
         } catch (error: any) {
             console.error("Failed to send message:", error)
-            alert(error.response?.data?.detail || "Failed to send message")
+            toast.error(error.response?.data?.detail || "Failed to send message")
         } finally {
             setSending(false)
         }

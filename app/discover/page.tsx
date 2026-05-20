@@ -141,6 +141,7 @@ export default function DiscoverPage() {
         <CreateSessionDialog
           open={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
+          onSessionCreated={handleSessionCreated}
         />
       </div>
     </AppLayout>

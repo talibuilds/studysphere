@@ -8,6 +8,7 @@ import AppLayout from "@/components/app-layout"
 import { CheckCircle, XCircle, BarChart3, Users, BookOpen } from "lucide-react"
 import { adminAPI } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
+import { toast } from "sonner"
 
 interface GroupRequest {
   id: string
@@ -54,20 +55,22 @@ export default function AdminPage() {
   const handleApprove = async (id: string) => {
     try {
       await adminAPI.approveGroup(id)
+      toast.success("Group approved successfully!")
       fetchAdminData() // Refresh data
     } catch (err) {
       console.error("Failed to approve group:", err)
-      alert("Failed to approve group")
+      toast.error("Failed to approve group")
     }
   }
 
   const handleReject = async (id: string) => {
     try {
       await adminAPI.rejectGroup(id)
+      toast.success("Group rejected successfully!")
       fetchAdminData() // Refresh data
     } catch (err) {
       console.error("Failed to reject group:", err)
-      alert("Failed to reject group")
+      toast.error("Failed to reject group")
     }
   }
 

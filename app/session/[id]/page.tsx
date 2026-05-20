@@ -11,6 +11,7 @@ import AppLayout from "@/components/app-layout"
 import { sessionsAPI } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
+import { toast } from "sonner"
 import { SessionChat } from "@/components/session-chat"
 import { SessionResources } from "@/components/session-resources"
 import { MarkAttendanceDialog } from "@/components/mark-attendance-dialog"
@@ -111,10 +112,10 @@ export default function SessionDetailPage() {
       // Refresh session data
       const updatedSession = await sessionsAPI.getById(sessionId)
       setSession(updatedSession)
-      alert("Successfully RSVP'd to session!")
+      toast.success("Successfully RSVP'd to session!")
     } catch (err: any) {
       console.error("Failed to RSVP:", err)
-      alert(err.response?.data?.detail || "Failed to RSVP")
+      toast.error(err.response?.data?.detail || "Failed to RSVP")
     } finally {
       setIsRSVPing(false)
     }
@@ -128,7 +129,7 @@ export default function SessionDetailPage() {
       const updatedSession = await sessionsAPI.getById(sessionId)
       setSession(updatedSession)
       setShowAttendanceDialog(false)
-      alert(`Attendance marked successfully! You earned ${result.xp_earned} XP!`)
+      toast.success(`Attendance marked successfully! You earned ${result.xp_earned} XP!`)
     } catch (err: any) {
       console.error("Failed to mark attendance:", err)
       throw new Error(err.response?.data?.detail || "Failed to mark attendance")
@@ -140,7 +141,7 @@ export default function SessionDetailPage() {
   const copyVerificationCode = () => {
     if (session?.verification_code) {
       navigator.clipboard.writeText(session.verification_code)
-      alert("Verification code copied to clipboard!")
+      toast.success("Verification code copied to clipboard!")
     }
   }
 
