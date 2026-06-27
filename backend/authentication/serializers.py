@@ -44,3 +44,15 @@ class ChangePasswordSerializer(serializers.Serializer):
     """Serializer for password change endpoint"""
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True, validators=[validate_password])
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """Serializer for requesting password reset"""
+    email = serializers.EmailField(required=True)
+
+
+class PasswordResetVerifySerializer(serializers.Serializer):
+    """Serializer for verifying password reset code"""
+    email = serializers.EmailField(required=True)
+    otp = serializers.CharField(required=True, min_length=6, max_length=6)
+    new_password = serializers.CharField(required=True, validators=[validate_password])

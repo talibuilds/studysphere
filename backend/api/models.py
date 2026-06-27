@@ -142,3 +142,21 @@ class SessionMessage(models.Model):
 
     def __str__(self):
         return f"{self.sender.username} - {self.session.title}"
+
+
+class PasswordResetOTP(models.Model):
+    """OTP code for password reset"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'password_reset_otps'
+
+    def is_expired(self):
+        # 15 minutes expiration
+        return timezone.now() > self.created_at + timezone.timedelta(minutes=15)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.otp}"

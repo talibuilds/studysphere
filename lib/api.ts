@@ -126,6 +126,16 @@ export const authAPI = {
 
         return { tokens, user };
     },
+
+    requestPasswordReset: async (email: string) => {
+        const response = await apiClient.post('/auth/password-reset/request/', { email });
+        return response.data;
+    },
+
+    verifyPasswordReset: async (resetData: any) => {
+        const response = await apiClient.post('/auth/password-reset/verify/', resetData);
+        return response.data;
+    },
 };
 
 

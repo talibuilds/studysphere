@@ -8,9 +8,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/lib/auth-context"
-import { GraduationCap, Sparkles, User, Lock, BookOpen, Star, Users, Mail } from "lucide-react"
+import { GraduationCap, Sparkles, User, Lock, BookOpen, Star, Users, Mail, Key } from "lucide-react"
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google'
 import PasswordInput from "@/components/password-input"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { authAPI } from "@/lib/api"
+import { toast } from "sonner"
 
 export default function AuthPage() {
   const router = useRouter()
@@ -32,6 +35,17 @@ export default function AuthPage() {
   })
   const [registerError, setRegisterError] = useState("")
   const [registerLoading, setRegisterLoading] = useState(false)
+
+  // Forgot Password state
+  const [isResetOpen, setIsResetOpen] = useState(false)
+  const [resetStep, setResetStep] = useState(1) // 1: request code, 2: verify & change
+  const [resetEmail, setResetEmail] = useState("")
+  const [resetOtp, setResetOtp] = useState("")
+  const [resetNewPassword, setResetNewPassword] = useState("")
+  const [resetNewPassword2, setResetNewPassword2] = useState("")
+  const [resetLoading, setResetLoading] = useState(false)
+  const [resetError, setResetError] = useState("")
+  const [resetSuccess, setResetSuccess] = useState("")
 
   // Redirect if already authenticated use useEffect to avoid render time updates
   useEffect(() => {
@@ -96,6 +110,67 @@ export default function AuthPage() {
       setRegisterError(error.message || "Registration failed. Please try again.")
     } finally {
       setRegisterLoading(false)
+    }
+  }
+
+  const handleRequestReset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setResetError("")
+    setResetLoading(true)
+    setResetSuccess("")
+
+    try {
+      await authAPI.requestPasswordReset(resetEmail)
+      setResetSuccess("Verification code sent to your email. Please check your inbox.")
+      setResetStep(2)
+    } catch (err: any) {
+      setResetError(err.response?.data?.detail || "Failed to send verification code. Please try again.")
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
+  const handleVerifyReset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setResetError("")
+    setResetSuccess("")
+
+    if (resetNewPassword !== resetNewPassword2) {
+      setResetError("Passwords do not match")
+      return
+    }
+
+    setResetLoading(true)
+
+    try {
+      await authAPI.verifyPasswordReset({
+        email: resetEmail,
+        otp: resetOtp,
+        new_password: resetNewPassword
+      })
+      setResetSuccess("Password reset successful! You can now log in with your new password.")
+      toast.success("Password reset successful!")
+      
+      // Reset form and close after 2 seconds
+      setTimeout(() => {
+        setIsResetOpen(false)
+        setResetStep(1)
+        setResetEmail("")
+        setResetOtp("")
+        setResetNewPassword("")
+        setResetNewPassword2("")
+        setResetSuccess("")
+      }, 2000)
+
+    } catch (err: any) {
+      setResetError(
+        err.response?.data?.otp?.[0] || 
+        err.response?.data?.new_password?.[0] || 
+        err.response?.data?.detail || 
+        "Failed to reset password. Please verify the code and try again."
+      )
+    } finally {
+      setResetLoading(false)
     }
   }
 
@@ -192,6 +267,20 @@ export default function AuthPage() {
                     disabled={loginLoading}
                     icon={<Lock size={18} />}
                   />
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsResetOpen(true);
+                        setResetStep(1);
+                        setResetError("");
+                        setResetSuccess("");
+                      }}
+                      className="text-xs text-purple-400 hover:text-purple-300 hover:underline font-semibold focus:outline-none transition-colors"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                 </div>
 
                 {loginError && (
@@ -348,6 +437,145 @@ export default function AuthPage() {
           </p>
         </div>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
+        <DialogContent className="glass border-border max-w-md p-8 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <Key className="text-primary h-5 w-5" />
+              Reset Password
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-1">
+              {resetStep === 1
+                ? "Enter your email to receive a 6-digit password reset code."
+                : "Enter the code sent to your email and choose a new password."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {resetStep === 1 ? (
+            <form onSubmit={handleRequestReset} className="space-y-4 mt-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="reset-email" className="text-xs font-semibold">
+                  Email Address
+                </Label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
+                    <Mail size={16} />
+                  </div>
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                    disabled={resetLoading}
+                    className="bg-secondary/30 border-border text-white pl-10 h-11 focus-visible:ring-1 focus-visible:ring-primary"
+                  />
+                </div>
+              </div>
+
+              {resetError && (
+                <div className="p-3 rounded-lg bg-red-950/40 border border-red-900/50">
+                  <p className="text-xs text-red-400 font-medium">{resetError}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 bg-transparent border-border hover:bg-white/5"
+                  onClick={() => setIsResetOpen(false)}
+                  disabled={resetLoading}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1 bg-primary hover:bg-primary/95 text-white" disabled={resetLoading}>
+                  {resetLoading ? "Sending..." : "Send Reset Code"}
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyReset} className="space-y-4 mt-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="reset-otp" className="text-xs font-semibold">
+                  6-Digit Verification Code
+                </Label>
+                <Input
+                  id="reset-otp"
+                  type="text"
+                  placeholder="123456"
+                  maxLength={6}
+                  value={resetOtp}
+                  onChange={(e) => setResetOtp(e.target.value)}
+                  required
+                  disabled={resetLoading}
+                  className="bg-secondary/30 border-border text-white text-center tracking-widest text-lg font-bold h-11 focus-visible:ring-1 focus-visible:ring-primary"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="reset-new-password" className="text-xs font-semibold">
+                  New Password
+                </Label>
+                <PasswordInput
+                  id="reset-new-password"
+                  placeholder="Enter new password"
+                  value={resetNewPassword}
+                  onChange={setResetNewPassword}
+                  required
+                  disabled={resetLoading}
+                  icon={<Lock size={16} />}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="reset-new-password-2" className="text-xs font-semibold">
+                  Confirm New Password
+                </Label>
+                <PasswordInput
+                  id="reset-new-password-2"
+                  placeholder="Confirm new password"
+                  value={resetNewPassword2}
+                  onChange={setResetNewPassword2}
+                  required
+                  disabled={resetLoading}
+                  icon={<Lock size={16} />}
+                />
+              </div>
+
+              {resetError && (
+                <div className="p-3 rounded-lg bg-red-950/40 border border-red-900/50">
+                  <p className="text-xs text-red-400 font-medium">{resetError}</p>
+                </div>
+              )}
+
+              {resetSuccess && (
+                <div className="p-3 rounded-lg bg-green-950/40 border border-green-900/50">
+                  <p className="text-xs text-green-400 font-medium">{resetSuccess}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 bg-transparent border-border hover:bg-white/5"
+                  onClick={() => setResetStep(1)}
+                  disabled={resetLoading}
+                >
+                  Back
+                </Button>
+                <Button type="submit" className="flex-1 bg-primary hover:bg-primary/95 text-white" disabled={resetLoading}>
+                  {resetLoading ? "Resetting..." : "Reset Password"}
+                </Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -4,9 +4,18 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-from api.models import User
+from django.core.mail import send_mail
+from django.utils import timezone
+import random
+from api.models import User, PasswordResetOTP
 from api.serializers import UserProfileSerializer
-from .serializers import RegisterSerializer, LoginSerializer, ChangePasswordSerializer
+from .serializers import (
+    RegisterSerializer, 
+    LoginSerializer, 
+    ChangePasswordSerializer, 
+    PasswordResetRequestSerializer, 
+    PasswordResetVerifySerializer
+)
 
 
 class RegisterView(generics.CreateAPIView):
@@ -180,3 +189,88 @@ class ChangePasswordView(generics.UpdateAPIView):
         user.save()
         
         return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+
+
+class PasswordResetRequestView(APIView):
+    """Endpoint for requesting a password reset OTP"""
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get('email')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # For security reasons, don't reveal if user exists or not
+            return Response(
+                {"detail": "If your email is registered, we have sent a reset code."},
+                status=status.HTTP_200_OK
+            )
+
+        # Generate a 6-digit OTP code
+        otp = f"{random.randint(100000, 999999)}"
+
+        # Save to database
+        PasswordResetOTP.objects.create(user=user, otp=otp)
+
+        # Send email (prints to console in local development)
+        send_mail(
+            subject='StudySphere - Password Reset Verification Code',
+            message=f'Hi {user.username},\n\nYour password reset verification code is: {otp}\n\nThis code will expire in 15 minutes.\n\nBest,\nStudySphere Team',
+            from_email='support@studysphere.com',
+            recipient_list=[email],
+            fail_silently=False,
+        )
+
+        return Response(
+            {"detail": "If your email is registered, we have sent a reset code."},
+            status=status.HTTP_200_OK
+        )
+
+
+class PasswordResetVerifyView(APIView):
+    """Endpoint for verifying OTP and resetting password"""
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = PasswordResetVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get('email')
+        otp = serializer.validated_data.get('otp')
+        new_password = serializer.validated_data.get('new_password')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "Invalid request parameters."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Get latest unused OTP for user
+        otp_record = PasswordResetOTP.objects.filter(
+            user=user,
+            otp=otp,
+            is_used=False
+        ).order_by('-created_at').first()
+
+        if not otp_record or otp_record.is_expired():
+            return Response(
+                {"otp": ["Invalid or expired verification code."]},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # OTP is valid, reset password
+        user.set_password(new_password)
+        user.save()
+
+        # Mark OTP as used
+        otp_record.is_used = True
+        otp_record.save()
+
+        return Response(
+            {"detail": "Password has been successfully reset."},
+            status=status.HTTP_200_OK
+        )

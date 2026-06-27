@@ -199,3 +199,7 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
+# Email Settings for Development
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'support@studysphere.com'
+
