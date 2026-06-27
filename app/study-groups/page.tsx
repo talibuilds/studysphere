@@ -106,6 +106,7 @@ export default function StudyGroupsPage() {
                         members: group.members_count,
                         createdBy: group.creator_name,
                         memberImages: group.member_images || [],
+                        icon: group.icon,
                       }}
                     />
                   ))}
@@ -128,6 +129,7 @@ export default function StudyGroupsPage() {
                         members: group.members_count,
                         createdBy: group.creator_name,
                         memberImages: group.member_images || [],
+                        icon: group.icon,
                       }}
                     />
                   ))}

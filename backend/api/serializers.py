@@ -52,7 +52,7 @@ class StudyGroupSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = StudyGroup
-        fields = ['id', 'name', 'subject', 'description', 'creator', 'creator_name', 
+        fields = ['id', 'name', 'subject', 'description', 'icon', 'creator', 'creator_name', 
                   'members_count', 'member_images', 'is_member', 'status', 'created_at', 'updated_at']
         read_only_fields = ['id', 'creator', 'status', 'created_at', 'updated_at']
     
@@ -75,7 +75,7 @@ class StudyGroupCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating study groups"""
     class Meta:
         model = StudyGroup
-        fields = ['name', 'subject', 'description']
+        fields = ['id', 'name', 'subject', 'description', 'icon']
 
 
 class StudySessionSerializer(serializers.ModelSerializer):
@@ -83,6 +83,7 @@ class StudySessionSerializer(serializers.ModelSerializer):
     host_name = serializers.CharField(source='host.username', read_only=True)
     host_image = serializers.SerializerMethodField()
     group_name = serializers.CharField(source='group.name', read_only=True, allow_null=True)
+    group_icon = serializers.CharField(source='group.icon', read_only=True, allow_null=True)
     attendees_count = serializers.SerializerMethodField()
     attendees_list = serializers.SerializerMethodField()
     is_attending = serializers.SerializerMethodField()
@@ -93,7 +94,7 @@ class StudySessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudySession
         fields = ['id', 'title', 'course_code', 'description', 'date', 'time', 'location',
-                  'host', 'host_name', 'host_image', 'group', 'group_name', 
+                  'host', 'host_name', 'host_image', 'group', 'group_name', 'group_icon',
                   'attendees_count', 'attendees_list', 'is_attending', 'has_attended', 'verification_code', 'is_group_member', 'created_at', 'updated_at']
         read_only_fields = ['id', 'host', 'created_at', 'updated_at']
         extra_kwargs = {

@@ -107,6 +107,7 @@ export default function DashboardPage() {
                   attendees_count: session.attendees_count,
                   host_name: session.host_name,
                   group_name: session.group_name,
+                  group_icon: session.group_icon,
                 }}
               />
             ))}

@@ -29,6 +29,7 @@ class StudyGroup(models.Model):
     name = models.CharField(max_length=200)
     subject = models.CharField(max_length=100)
     description = models.TextField()
+    icon = models.CharField(max_length=50, default='users')
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_groups')
     members = models.ManyToManyField(User, through='GroupMembership', related_name='joined_groups')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')

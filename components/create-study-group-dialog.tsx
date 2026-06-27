@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
+import { Code, Cpu, PenTool, Layout, Users, Monitor, BookOpen, Briefcase } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,6 +23,7 @@ export default function CreateStudyGroupDialog({ open, onOpenChange }: CreateStu
     name: "",
     subject: "",
     description: "",
+    icon: "users",
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -31,6 +33,21 @@ export default function CreateStudyGroupDialog({ open, onOpenChange }: CreateStu
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleIconSelect = (iconName: string) => {
+    setFormData((prev) => ({ ...prev, icon: iconName }))
+  }
+
+  const availableIcons = [
+    { name: "users", icon: Users },
+    { name: "code", icon: Code },
+    { name: "cpu", icon: Cpu },
+    { name: "pen-tool", icon: PenTool },
+    { name: "layout", icon: Layout },
+    { name: "monitor", icon: Monitor },
+    { name: "book-open", icon: BookOpen },
+    { name: "briefcase", icon: Briefcase },
+  ]
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
@@ -39,7 +56,7 @@ export default function CreateStudyGroupDialog({ open, onOpenChange }: CreateStu
     try {
       await groupsAPI.create(formData)
       onOpenChange(false)
-      setFormData({ name: "", subject: "", description: "" })
+      setFormData({ name: "", subject: "", description: "", icon: "users" })
       router.refresh() // Refresh to show new group (if approved by admin)
       // Show success message
       toast.success("Group created successfully! It will appear after admin approval.")
@@ -74,6 +91,27 @@ export default function CreateStudyGroupDialog({ open, onOpenChange }: CreateStu
               required
               disabled={loading}
             />
+          </div>
+
+          <div>
+            <Label className="text-sm font-medium mb-2 block">Group Icon</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {availableIcons.map(({ name, icon: Icon }) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => handleIconSelect(name)}
+                  className={`p-3 rounded-lg flex items-center justify-center transition-all ${
+                    formData.icon === name
+                      ? "bg-primary text-primary-foreground border-2 border-primary"
+                      : "bg-secondary/50 border border-border text-muted-foreground hover:bg-secondary"
+                  }`}
+                  disabled={loading}
+                >
+                  <Icon size={20} />
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>
