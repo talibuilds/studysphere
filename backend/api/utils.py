@@ -29,4 +29,5 @@ XP_REWARDS = {
     'rsvp_session': 10,
     'join_group': 25,
     'create_group': 30,
+    'mark_attendance': 100,
 }

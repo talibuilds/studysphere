@@ -107,7 +107,7 @@ export const authAPI = {
     },
 
     updateProfile: async (userData: any) => {
-        const response = await apiClient.put('/auth/me/', userData);
+        const response = await apiClient.patch('/auth/me/', userData);
         return response.data;
     },
 

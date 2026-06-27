@@ -4,6 +4,7 @@ import type React from "react"
 import Link from "next/link"
 import { usePathname } from 'next/navigation'
 import { BrainCircuit, LayoutDashboard, Search, Trophy, User, Moon, BookOpen } from 'lucide-react'
+import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useTheme } from "@/app/providers"
@@ -19,7 +20,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { user, isAuthenticated } = useAuth()
 
   const navItems = [
-    { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/discover", label: "Discover", icon: Search },
     { href: "/study-groups", label: "Study Groups", icon: BookOpen },
     { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
@@ -27,8 +28,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   ]
 
   const isActive = (href: string) => {
-    if (href === "/") return pathname === "/"
-    return pathname.startsWith(href)
+    return pathname === href || pathname.startsWith(`${href}/`)
   }
 
   return (
@@ -36,10 +36,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* Sidebar */}
       <aside className="w-64 border-r border-border sticky top-0 overflow-y-auto">
         <div className="glass sticky top-0 px-6 py-5 border-b border-border">
-          <Link href="/landing" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="p-2 rounded-lg bg-primary/15 text-primary">
-              <BrainCircuit size={24} />
-            </div>
+          <Link href="/" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+            <Logo className="w-8 h-8" />
             <span className="text-lg font-semibold tracking-tight">StudySphere</span>
           </Link>
         </div>

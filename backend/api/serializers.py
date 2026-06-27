@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.utils import timezone
 from datetime import datetime
-from .models import User, StudySession, StudyGroup, SessionRSVP, GroupMembership, Badge
+from .models import User, StudySession, StudyGroup, SessionRSVP, GroupMembership, Badge, SessionResource, SessionMessage
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -86,12 +86,14 @@ class StudySessionSerializer(serializers.ModelSerializer):
     attendees_count = serializers.SerializerMethodField()
     attendees_list = serializers.SerializerMethodField()
     is_attending = serializers.SerializerMethodField()
+    has_attended = serializers.SerializerMethodField()
+    verification_code = serializers.SerializerMethodField()
     
     class Meta:
         model = StudySession
         fields = ['id', 'title', 'course_code', 'description', 'date', 'time', 'location',
                   'host', 'host_name', 'host_image', 'group', 'group_name', 
-                  'attendees_count', 'attendees_list', 'is_attending', 'created_at', 'updated_at']
+                  'attendees_count', 'attendees_list', 'is_attending', 'has_attended', 'verification_code', 'created_at', 'updated_at']
         read_only_fields = ['id', 'host', 'created_at', 'updated_at']
     
     def get_host_image(self, obj):
@@ -114,6 +116,22 @@ class StudySessionSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.attendees.filter(id=request.user.id).exists()
         return False
+
+    def get_has_attended(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            try:
+                rsvp = SessionRSVP.objects.get(session=obj, user=request.user)
+                return rsvp.attended
+            except SessionRSVP.DoesNotExist:
+                return False
+        return False
+
+    def get_verification_code(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated and request.user == obj.host:
+            return obj.verification_code
+        return None
 
 
 class StudySessionCreateSerializer(serializers.ModelSerializer):
@@ -159,3 +177,52 @@ class LeaderboardSerializer(serializers.ModelSerializer):
         if latest_badge:
             return latest_badge.name
         return 'Rising Star'  # Default badge
+
+
+class SessionResourceSerializer(serializers.ModelSerializer):
+    added_by_name = serializers.CharField(source='added_by.username', read_only=True)
+    added_by_image = serializers.SerializerMethodField()
+    can_delete = serializers.SerializerMethodField()
+    is_owner = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = SessionResource
+        fields = ['id', 'title', 'link', 'added_by_name', 'added_by_image', 'can_delete', 'is_owner', 'created_at']
+
+    def get_added_by_image(self, obj):
+        if obj.added_by.image:
+            return obj.added_by.image
+        return f"https://api.dicebear.com/7.x/avataaars/svg?seed={obj.added_by.username}"
+
+    def get_can_delete(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return request.user == obj.added_by or request.user == obj.session.host
+        return False
+        
+    def get_is_owner(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return request.user == obj.added_by
+        return False
+
+
+class SessionMessageSerializer(serializers.ModelSerializer):
+    sender_name = serializers.CharField(source='sender.username', read_only=True)
+    sender_image = serializers.SerializerMethodField()
+    is_current_user = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = SessionMessage
+        fields = ['id', 'text', 'sender_name', 'sender_image', 'is_current_user', 'created_at']
+
+    def get_sender_image(self, obj):
+        if obj.sender.image:
+            return obj.sender.image
+        return f"https://api.dicebear.com/7.x/avataaars/svg?seed={obj.sender.username}"
+
+    def get_is_current_user(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return request.user == obj.sender
+        return False

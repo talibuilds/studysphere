@@ -5,12 +5,15 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from django.utils import timezone
 from datetime import timedelta, datetime
 from django.db.models import Count, Q
+import random
+import string
 
-from .models import User, StudySession, StudyGroup, SessionRSVP, GroupMembership
+from .models import User, StudySession, StudyGroup, SessionRSVP, GroupMembership, SessionResource, SessionMessage
 from .serializers import (
     StudySessionSerializer, StudySessionCreateSerializer,
     StudyGroupSerializer, StudyGroupCreateSerializer,
-    LeaderboardSerializer, UserProfileSerializer
+    LeaderboardSerializer, UserProfileSerializer,
+    SessionResourceSerializer, SessionMessageSerializer
 )
 from .permissions import IsHostOrReadOnly, IsCreatorOrReadOnly, IsAdminUser
 from .utils import award_xp, XP_REWARDS
@@ -27,7 +30,8 @@ class StudySessionViewSet(viewsets.ModelViewSet):
         return StudySessionSerializer
     
     def perform_create(self, serializer):
-        session = serializer.save(host=self.request.user)
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        session = serializer.save(host=self.request.user, verification_code=code)
         # Award XP for creating a session
         award_xp(self.request.user, XP_REWARDS['create_session'])
     
@@ -101,6 +105,93 @@ class StudySessionViewSet(viewsets.ModelViewSet):
                 {'detail': 'You have not RSVP\'d to this session'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    @action(detail=True, methods=['post'], url_path='mark-attendance', permission_classes=[IsAuthenticated])
+    def mark_attendance(self, request, pk=None):
+        """Mark attendance with verification code"""
+        session = self.get_object()
+        code = request.data.get('code')
+        
+        if not code or code != session.verification_code:
+            return Response(
+                {'detail': 'Invalid verification code'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        try:
+            rsvp = SessionRSVP.objects.get(user=request.user, session=session)
+            if rsvp.attended:
+                return Response(
+                    {'detail': 'Attendance already marked'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+            rsvp.attended = True
+            rsvp.save()
+            
+            # Award XP
+            award_xp(request.user, XP_REWARDS['mark_attendance'])
+            
+            return Response(
+                {'detail': 'Successfully marked attendance', 'xp_earned': XP_REWARDS['mark_attendance']},
+                status=status.HTTP_200_OK
+            )
+        except SessionRSVP.DoesNotExist:
+            return Response(
+                {'detail': 'You must RSVP before marking attendance'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    @action(detail=True, methods=['get'])
+    def resources(self, request, pk=None):
+        session = self.get_object()
+        resources = session.resources.all()
+        serializer = SessionResourceSerializer(resources, many=True, context={'request': request})
+        return Response(serializer.data)
+        
+    @action(detail=True, methods=['post'], url_path='add_resource', permission_classes=[IsAuthenticated])
+    def add_resource(self, request, pk=None):
+        session = self.get_object()
+        title = request.data.get('title')
+        link = request.data.get('link')
+        if not title or not link:
+            return Response({'detail': 'Title and link are required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        resource = SessionResource.objects.create(session=session, added_by=request.user, title=title, link=link)
+        serializer = SessionResourceSerializer(resource, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['delete'], url_path='delete-resource/(?P<resource_id>\d+)', permission_classes=[IsAuthenticated])
+    def delete_resource(self, request, pk=None, resource_id=None):
+        session = self.get_object()
+        try:
+            resource = SessionResource.objects.get(id=resource_id, session=session)
+            if request.user != resource.added_by and request.user != session.host:
+                return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+            resource.delete()
+            return Response({'detail': 'Resource deleted'}, status=status.HTTP_200_OK)
+        except SessionResource.DoesNotExist:
+            return Response({'detail': 'Resource not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=True, methods=['get'])
+    def messages(self, request, pk=None):
+        session = self.get_object()
+        msgs = session.messages.all()
+        serializer = SessionMessageSerializer(msgs, many=True, context={'request': request})
+        return Response(serializer.data)
+        
+    @action(detail=True, methods=['post'], url_path='send_message', permission_classes=[IsAuthenticated])
+    def send_message(self, request, pk=None):
+        session = self.get_object()
+        text = request.data.get('text')
+        if not text:
+            return Response({'detail': 'Message text required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        msg = SessionMessage.objects.create(session=session, sender=request.user, text=text)
+        serializer = SessionMessageSerializer(msg, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 
 class StudyGroupViewSet(viewsets.ModelViewSet):

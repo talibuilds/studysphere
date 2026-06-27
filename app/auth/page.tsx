@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/lib/auth-context"
-import { GraduationCap } from "lucide-react"
+import { GraduationCap, Sparkles, User, Lock, BookOpen, Star, Users, Mail } from "lucide-react"
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google'
 import PasswordInput from "@/components/password-input"
 
@@ -100,46 +100,89 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 rounded-full bg-primary/10">
-              <GraduationCap size={40} className="text-primary" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold mb-2">Welcome to StudySphere</h1>
-          <p className="text-muted-foreground text-sm">
-            Connect with fellow students and ace your exams together
+    <div className="min-h-screen w-full flex bg-[#000000] text-white font-sans overflow-hidden">
+      <div className="hidden lg:flex w-2/3 flex-col p-16 relative bg-[url('/bg-login.png')] bg-cover bg-center before:absolute before:inset-0 before:bg-black/40 after:absolute after:inset-y-0 after:right-0 after:w-1/2 after:bg-gradient-to-l after:from-[#000000] after:to-transparent">
+        
+        {/* Main Content - Centered */}
+        <div className="relative z-10 flex flex-col justify-center flex-1 max-w-lg">
+          <h1 className="text-[3.5rem] font-extrabold leading-[1.1] mb-6">
+            Where BMSCE <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Studies Together</span>
+          </h1>
+          <p className="text-lg text-slate-300 max-w-sm">
+            Connect with peers, join sessions, share resources, and level up your learning.
           </p>
         </div>
+        
+        {/* Stats - Bottom */}
+        <div className="relative z-10 grid grid-cols-3 gap-6 max-w-lg pb-4">
+            <div className="space-y-3">
+              <Users className="text-blue-400" size={28} />
+              <div>
+                <p className="font-bold text-xl">500+</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Active Students</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <BookOpen className="text-blue-400" size={28} />
+              <div>
+                <p className="font-bold text-xl">120+</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Study Sessions</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Star className="text-blue-400" size={28} />
+              <div>
+                <p className="font-bold text-xl">98%</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Satisfaction Rate</p>
+              </div>
+            </div>
+        </div>
+      </div>
 
-        <Card className="glass-card p-6">
+      {/* Right Side - Auth Form */}
+      <div className="w-full lg:w-1/3 flex items-center justify-center p-6 lg:p-12 relative z-10 bg-[#000000]">
+        <div className="w-full max-w-[480px] bg-[#0c0c0e] border border-white/5 rounded-[32px] p-10 lg:p-12 relative overflow-hidden">
+          
+          <div className="space-y-1 mb-8 text-center sm:text-left">
+            <h2 className="text-3xl font-bold tracking-tight">
+              Welcome <span className="text-purple-500">back</span>
+            </h2>
+            <p className="text-sm text-slate-400">
+              Enter your credentials to access your account
+            </p>
+          </div>
+
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsList className="flex w-full mb-8 bg-black/40 p-1 rounded-2xl border border-white/5">
+              <TabsTrigger value="login" className="flex-1 rounded-xl data-[state=active]:bg-white/10 data-[state=active]:text-white text-slate-400 transition-all py-2.5 font-medium">Login</TabsTrigger>
+              <TabsTrigger value="register" className="flex-1 rounded-xl data-[state=active]:bg-white/10 data-[state=active]:text-white text-slate-400 transition-all py-2.5 font-medium">Register</TabsTrigger>
             </TabsList>
 
             {/* Login Tab */}
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-username">Username</Label>
-                  <Input
-                    id="login-username"
-                    type="text"
-                    placeholder="Enter your username"
-                    value={loginData.username}
-                    onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
-                    required
-                    disabled={loginLoading}
-                  />
+            <TabsContent value="login" className="animate-in fade-in-50 duration-500">
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="login-username" className="text-slate-300 text-xs font-semibold ml-1">Username</Label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
+                      <User size={18} />
+                    </div>
+                    <Input
+                      id="login-username"
+                      type="text"
+                      placeholder="Enter your username"
+                      value={loginData.username}
+                      onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+                      required
+                      disabled={loginLoading}
+                      className="bg-[#12131a] border-white/5 text-white h-11 pl-10 pr-4 rounded-xl focus-visible:ring-1 focus-visible:ring-purple-500 placeholder:text-slate-600"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="login-password" className="text-slate-300 text-xs font-semibold ml-1">Password</Label>
                   <PasswordInput
                     id="login-password"
                     placeholder="Enter your password"
@@ -147,53 +190,54 @@ export default function AuthPage() {
                     onChange={(value) => setLoginData({ ...loginData, password: value })}
                     required
                     disabled={loginLoading}
+                    icon={<Lock size={18} />}
                   />
                 </div>
 
                 {loginError && (
-                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                    <p className="text-sm text-red-500">{loginError}</p>
+                  <div className="p-3.5 rounded-xl bg-red-950/40 border border-red-900/50 flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,1)]"></div>
+                    <p className="text-sm text-red-400 font-medium">{loginError}</p>
                   </div>
                 )}
 
-                <Button type="submit" className="w-full" disabled={loginLoading}>
-                  {loginLoading ? "Logging in..." : "Login"}
+                <Button type="submit" className="w-full h-[52px] rounded-2xl bg-[#8b5cf6] hover:bg-[#7c3aed] text-white transition-all mt-4 font-bold text-sm group" disabled={loginLoading}>
+                  {loginLoading ? "Logging in..." : "Login to Dashboard"} 
+                  <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
                 </Button>
 
-                <div className="relative my-6">
+                <div className="relative my-8">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-muted"></div>
+                    <div className="w-full border-t border-white/5"></div>
                   </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                  <div className="relative flex justify-center text-[10px] uppercase tracking-wider font-bold">
+                    <span className="bg-[#0b0c10] px-4 text-slate-500">Or continue with</span>
                   </div>
                 </div>
 
-                <div className="flex justify-center">
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={handleGoogleError}
-                    useOneTap
-                    theme="outline"
-                    size="large"
-                    text="signin_with"
-                    width="100%"
-                  />
-                </div>
-
-                <div className="text-center text-sm text-muted-foreground mt-4">
-                  <p>Demo credentials:</p>
-                  <p className="font-mono text-xs mt-1">razan / password123@#</p>
+                <div className="flex justify-center w-full">
+                  <div className="w-full rounded-xl overflow-hidden hover:opacity-90 transition-opacity flex justify-center">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      useOneTap
+                      theme="filled_black"
+                      size="large"
+                      text="signin_with"
+                      width="100%"
+                      shape="rectangular"
+                    />
+                  </div>
                 </div>
               </form>
             </TabsContent>
 
             {/* Register Tab */}
-            <TabsContent value="register">
+            <TabsContent value="register" className="animate-in fade-in-50 duration-500">
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="first-name">First Name</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="first-name" className="text-slate-300 text-xs font-semibold ml-1">First Name</Label>
                     <Input
                       id="first-name"
                       type="text"
@@ -202,11 +246,12 @@ export default function AuthPage() {
                       onChange={(e) => setRegisterData({ ...registerData, first_name: e.target.value })}
                       required
                       disabled={registerLoading}
+                      className="bg-[#12131a] border-white/5 text-white h-11 px-4 rounded-xl focus-visible:ring-1 focus-visible:ring-purple-500 placeholder:text-slate-600"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="last-name">Last Name</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="last-name" className="text-slate-300 text-xs font-semibold ml-1">Last Name</Label>
                     <Input
                       id="last-name"
                       type="text"
@@ -215,38 +260,51 @@ export default function AuthPage() {
                       onChange={(e) => setRegisterData({ ...registerData, last_name: e.target.value })}
                       required
                       disabled={registerLoading}
+                      className="bg-[#12131a] border-white/5 text-white h-11 px-4 rounded-xl focus-visible:ring-1 focus-visible:ring-purple-500 placeholder:text-slate-600"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="register-username">Username</Label>
-                  <Input
-                    id="register-username"
-                    type="text"
-                    placeholder="Choose a username"
-                    value={registerData.username}
-                    onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
-                    required
-                    disabled={registerLoading}
-                  />
+                <div className="space-y-1.5">
+                  <Label htmlFor="register-username" className="text-slate-300 text-xs font-semibold ml-1">Username</Label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
+                      <User size={18} />
+                    </div>
+                    <Input
+                      id="register-username"
+                      type="text"
+                      placeholder="Choose a username"
+                      value={registerData.username}
+                      onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
+                      required
+                      disabled={registerLoading}
+                      className="bg-[#12131a] border-white/5 text-white h-11 pl-10 pr-4 rounded-xl focus-visible:ring-1 focus-visible:ring-purple-500 placeholder:text-slate-600"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={registerData.email}
-                    onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                    required
-                    disabled={registerLoading}
-                  />
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-slate-300 text-xs font-semibold ml-1">College Email</Label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
+                      <Mail size={18} />
+                    </div>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your.name@bmsce.ac.in"
+                      value={registerData.email}
+                      onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                      required
+                      disabled={registerLoading}
+                      className="bg-[#12131a] border-white/5 text-white h-11 pl-10 pr-4 rounded-xl focus-visible:ring-1 focus-visible:ring-purple-500 placeholder:text-slate-600"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="register-password">Password</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="register-password" className="text-slate-300 text-xs font-semibold ml-1">Password</Label>
                   <PasswordInput
                     id="register-password"
                     placeholder="Create a password"
@@ -254,11 +312,12 @@ export default function AuthPage() {
                     onChange={(value) => setRegisterData({ ...registerData, password: value })}
                     required
                     disabled={registerLoading}
+                    icon={<Lock size={18} />}
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="confirm-password" className="text-slate-300 text-xs font-semibold ml-1">Confirm Password</Label>
                   <PasswordInput
                     id="confirm-password"
                     placeholder="Confirm your password"
@@ -266,26 +325,28 @@ export default function AuthPage() {
                     onChange={(value) => setRegisterData({ ...registerData, password2: value })}
                     required
                     disabled={registerLoading}
+                    icon={<Lock size={18} />}
                   />
                 </div>
 
                 {registerError && (
-                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                    <p className="text-sm text-red-500">{registerError}</p>
+                  <div className="p-3.5 rounded-xl bg-red-950/40 border border-red-900/50 flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,1)]"></div>
+                    <p className="text-sm text-red-400 font-medium">{registerError}</p>
                   </div>
                 )}
 
-                <Button type="submit" className="w-full" disabled={registerLoading}>
+                <Button type="submit" className="w-full h-[52px] rounded-2xl bg-[#8b5cf6] hover:bg-[#7c3aed] text-white transition-all mt-6 font-bold text-sm" disabled={registerLoading}>
                   {registerLoading ? "Creating account..." : "Create Account"}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
-        </Card>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          By continuing, you agree to StudySphere's Terms of Service and Privacy Policy.
-        </p>
+          <p className="text-center text-[10px] text-slate-500 mt-8 leading-relaxed max-w-xs mx-auto">
+            By continuing, you agree to StudySphere's <span className="text-slate-300 hover:text-white cursor-pointer transition-colors">Terms of Service</span> and <span className="text-slate-300 hover:text-white cursor-pointer transition-colors">Privacy Policy</span>.
+          </p>
+        </div>
       </div>
     </div>
   )

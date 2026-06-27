@@ -57,7 +57,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <AuthProvider>
-        <ThemeProviderInner>{children}</ThemeProviderInner>
+        <ThemeProviderInner>
+          {children}
+        </ThemeProviderInner>
       </AuthProvider>
     </GoogleOAuthProvider>
   )

@@ -54,6 +54,7 @@ class StudySession(models.Model):
     host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hosted_sessions')
     group = models.ForeignKey(StudyGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name='sessions')
     attendees = models.ManyToManyField(User, through='SessionRSVP', related_name='attending_sessions')
+    verification_code = models.CharField(max_length=10, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -69,6 +70,7 @@ class SessionRSVP(models.Model):
     """Many-to-many relationship for session attendance"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     session = models.ForeignKey(StudySession, on_delete=models.CASCADE)
+    attended = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -108,3 +110,34 @@ class Badge(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.name}"
+
+
+class SessionResource(models.Model):
+    """Resources shared within a study session"""
+    title = models.CharField(max_length=200)
+    link = models.URLField(max_length=500)
+    session = models.ForeignKey(StudySession, on_delete=models.CASCADE, related_name='resources')
+    added_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='added_resources')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'session_resources'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+
+class SessionMessage(models.Model):
+    """Chat messages within a study session"""
+    text = models.TextField()
+    session = models.ForeignKey(StudySession, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'session_messages'
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.sender.username} - {self.session.title}"

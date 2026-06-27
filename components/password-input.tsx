@@ -11,6 +11,7 @@ interface PasswordInputProps {
     onChange: (value: string) => void
     required?: boolean
     disabled?: boolean
+    icon?: React.ReactNode
 }
 
 export default function PasswordInput({
@@ -20,6 +21,7 @@ export default function PasswordInput({
     onChange,
     required = false,
     disabled = false,
+    icon,
 }: PasswordInputProps) {
     const [showPassword, setShowPassword] = useState(false)
 
@@ -33,8 +35,13 @@ export default function PasswordInput({
                 onChange={(e) => onChange(e.target.value)}
                 required={required}
                 disabled={disabled}
-                className="pr-10"
+                className={`pr-10 ${icon ? 'pl-10' : ''}`}
             />
+            {icon && (
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
+                    {icon}
+                </div>
+            )}
             <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}

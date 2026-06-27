@@ -8,8 +8,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import AppLayout from "@/components/app-layout"
 import Link from "next/link"
-import { ShieldAlert } from "lucide-react"
+import { ShieldAlert, Edit2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { useAuth } from "@/lib/auth-context"
 import { authAPI } from "@/lib/api"
 
@@ -25,14 +28,16 @@ export default function ProfilePage() {
   const [profileData, setProfileData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editData, setEditData] = useState({ first_name: '', last_name: '' })
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
 
     if (!isAuthenticated) {
-      if (typeof window !== 'undefined') {
-        window.location.href = '/auth'
-      }
+      setLoading(false)
       return
     }
 
@@ -53,6 +58,29 @@ export default function ProfilePage() {
     fetchProfile()
   }, [isAuthenticated, authLoading])
 
+  useEffect(() => {
+    if (profileData) {
+      setEditData({
+        first_name: profileData.first_name || '',
+        last_name: profileData.last_name || ''
+      })
+    }
+  }, [profileData])
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSaving(true)
+    try {
+      await authAPI.updateProfile(editData)
+      setProfileData({ ...profileData, ...editData })
+      setIsEditDialogOpen(false)
+    } catch (err) {
+      console.error("Failed to update profile", err)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   if (authLoading || loading) {
     return (
       <AppLayout>
@@ -64,6 +92,20 @@ export default function ProfilePage() {
   }
 
   if (error || !profileData) {
+    if (!isAuthenticated) {
+      return (
+        <AppLayout>
+          <div className="text-center py-20 glass rounded-lg p-12 max-w-lg mx-auto mt-10">
+            <h2 className="text-2xl font-bold mb-4">Guest Profile</h2>
+            <p className="text-slate-400 mb-8">You are currently exploring as a guest. Log in to track your XP, earn badges, and manage your study groups.</p>
+            <Link href="/auth">
+              <Button className="w-full">Sign in to your account</Button>
+            </Link>
+          </div>
+        </AppLayout>
+      )
+    }
+
     return (
       <AppLayout>
         <div className="text-center py-20">
@@ -98,6 +140,41 @@ export default function ProfilePage() {
               <p className="text-lg text-muted-foreground">Level {level}</p>
             </div>
             <div className="flex gap-2">
+              <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <Edit2 size={16} />
+                    Edit Profile
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Edit Profile</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleEditSubmit} className="space-y-4 pt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="first_name">First Name</Label>
+                      <Input 
+                        id="first_name" 
+                        value={editData.first_name} 
+                        onChange={(e) => setEditData({...editData, first_name: e.target.value})} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="last_name">Last Name</Label>
+                      <Input 
+                        id="last_name" 
+                        value={editData.last_name} 
+                        onChange={(e) => setEditData({...editData, last_name: e.target.value})} 
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={isSaving}>
+                      {isSaving ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
               {user?.is_staff && (
                 <Link href="/admin">
                   <Button className="gap-2">
@@ -106,7 +183,7 @@ export default function ProfilePage() {
                   </Button>
                 </Link>
               )}
-              <Button variant="outline" onClick={logout} className="gap-2">
+              <Button onClick={logout} variant="destructive" className="gap-2 bg-red-900/50 hover:bg-red-800/80 text-red-100 border border-red-800">
                 Logout
               </Button>
             </div>
