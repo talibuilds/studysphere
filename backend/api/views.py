@@ -40,6 +40,13 @@ class StudySessionViewSet(viewsets.ModelViewSet):
         """RSVP to a session"""
         session = self.get_object()
         
+        # Check if user is a member of the session's group
+        if session.group and not session.group.members.filter(id=request.user.id).exists():
+            return Response(
+                {'detail': 'You must join the group to RSVP to this session'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
         # Check if already RSVP'd
         if SessionRSVP.objects.filter(user=request.user, session=session).exists():
             return Response(
@@ -245,22 +252,30 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
             {'detail': 'Successfully joined group', 'xp_earned': XP_REWARDS['join_group']},
             status=status.HTTP_201_CREATED
         )
-    
+
     @action(detail=True, methods=['delete'], permission_classes=[IsAuthenticated])
     def leave(self, request, pk=None):
         """Leave a study group"""
         group = self.get_object()
         
-        try:
-            membership = GroupMembership.objects.get(user=request.user, group=group)
-            membership.delete()
-            return Response({'detail': 'Successfully left group'}, status=status.HTTP_200_OK)
-        except GroupMembership.DoesNotExist:
+        # Prevent creator from leaving
+        if group.creator == request.user:
+            return Response(
+                {'detail': 'The creator cannot leave the group. You can delete the group instead.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        membership = GroupMembership.objects.filter(user=request.user, group=group)
+        if not membership.exists():
             return Response(
                 {'detail': 'You are not a member of this group'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-    
+            
+        membership.delete()
+        
+        return Response({'detail': 'Successfully left group'}, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['get'])
     def sessions(self, request, pk=None):
         """Get all sessions for this group"""

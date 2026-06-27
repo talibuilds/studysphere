@@ -39,3 +39,8 @@ class LoginSerializer(serializers.Serializer):
     """Serializer for user login"""
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """Serializer for password change endpoint"""
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, validators=[validate_password])

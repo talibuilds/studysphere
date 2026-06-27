@@ -58,15 +58,7 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
         console.log("All groups (array):", allGroups)
 
         // Filter to only groups where the user is a member
-        const userGroups = allGroups.filter((group: any) => {
-          const isMember = group.members?.some((member: any) => member.id === user?.id)
-          console.log(`Group "${group.name}":`, {
-            members: group.members,
-            isMember,
-            memberIds: group.members?.map((m: any) => m.id)
-          })
-          return isMember
-        })
+        const userGroups = allGroups.filter((group: any) => group.is_member)
 
         console.log("Filtered user groups:", userGroups)
         setGroups(userGroups)
@@ -91,6 +83,11 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
 
       if (selectedDate < now) {
         toast.error("Cannot create a session for a date that has already passed.")
+        return
+      }
+
+      if (!formData.group) {
+        toast.error("Please select a group for this session.")
         return
       }
 
@@ -165,7 +162,7 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-1 block">Group (Optional)</label>
+            <label className="text-sm font-medium mb-1 block">Group</label>
             <Select
               value={formData.group}
               onValueChange={(value) => setFormData({ ...formData, group: value })}

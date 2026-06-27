@@ -117,8 +117,8 @@ export default function LandingPage() {
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Button size="lg" className="rounded-xl gap-2 px-8 py-6 text-base w-full sm:w-auto shadow-lg shadow-blue-500/25 bg-blue-500 hover:bg-blue-600 text-white" asChild>
-                <Link href="/auth">
-                  Get Started Free
+                <Link href={isAuthenticated ? "/dashboard" : "/auth"}>
+                  {isAuthenticated ? "Go to Dashboard" : "Get Started Free"}
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="rounded-xl gap-2 px-8 py-6 text-base w-full sm:w-auto border-border/50 bg-background/50 backdrop-blur hover:bg-muted" asChild>

@@ -44,6 +44,9 @@ export default function StudyGroupsPage() {
       group.description?.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
+  const joinedGroups = filteredGroups.filter((g) => g.is_member)
+  const availableGroups = filteredGroups.filter((g) => !g.is_member)
+
   return (
     <AppLayout>
       <div className="max-w-5xl">
@@ -88,20 +91,49 @@ export default function StudyGroupsPage() {
         {/* Groups List */}
         {!loading && !error && filteredGroups.length > 0 && (
           <div className="space-y-10">
-            {filteredGroups.map((group) => (
-              <StudyGroupCard
-                key={group.id}
-                group={{
-                  id: group.id,
-                  name: group.name,
-                  subject: group.subject,
-                  description: group.description,
-                  members: group.members_count,
-                  createdBy: group.creator_name,
-                  memberImages: group.member_images || [],
-                }}
-              />
-            ))}
+            {joinedGroups.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Your Groups</h2>
+                <div className="space-y-6">
+                  {joinedGroups.map((group) => (
+                    <StudyGroupCard
+                      key={group.id}
+                      group={{
+                        id: group.id,
+                        name: group.name,
+                        subject: group.subject,
+                        description: group.description,
+                        members: group.members_count,
+                        createdBy: group.creator_name,
+                        memberImages: group.member_images || [],
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {availableGroups.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Available Groups</h2>
+                <div className="space-y-6">
+                  {availableGroups.map((group) => (
+                    <StudyGroupCard
+                      key={group.id}
+                      group={{
+                        id: group.id,
+                        name: group.name,
+                        subject: group.subject,
+                        description: group.description,
+                        members: group.members_count,
+                        createdBy: group.creator_name,
+                        memberImages: group.member_images || [],
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -88,13 +88,23 @@ class StudySessionSerializer(serializers.ModelSerializer):
     is_attending = serializers.SerializerMethodField()
     has_attended = serializers.SerializerMethodField()
     verification_code = serializers.SerializerMethodField()
+    is_group_member = serializers.SerializerMethodField()
     
     class Meta:
         model = StudySession
         fields = ['id', 'title', 'course_code', 'description', 'date', 'time', 'location',
                   'host', 'host_name', 'host_image', 'group', 'group_name', 
-                  'attendees_count', 'attendees_list', 'is_attending', 'has_attended', 'verification_code', 'created_at', 'updated_at']
+                  'attendees_count', 'attendees_list', 'is_attending', 'has_attended', 'verification_code', 'is_group_member', 'created_at', 'updated_at']
         read_only_fields = ['id', 'host', 'created_at', 'updated_at']
+        extra_kwargs = {
+            'group': {'required': True, 'allow_null': False}
+        }
+    
+    def get_is_group_member(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated and obj.group:
+            return obj.group.members.filter(id=request.user.id).exists()
+        return False
     
     def get_host_image(self, obj):
         if obj.host.image:

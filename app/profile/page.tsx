@@ -30,8 +30,14 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null)
   
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [editData, setEditData] = useState({ first_name: '', last_name: '' })
+  const [editData, setEditData] = useState({ first_name: '', last_name: '', username: '', email: '' })
   const [isSaving, setIsSaving] = useState(false)
+  const [editError, setEditError] = useState<string | null>(null)
+  
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
+  const [passwordData, setPasswordData] = useState({ old_password: '', new_password: '' })
+  const [isSavingPassword, setIsSavingPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
 
   useEffect(() => {
     if (authLoading) return
@@ -62,7 +68,9 @@ export default function ProfilePage() {
     if (profileData) {
       setEditData({
         first_name: profileData.first_name || '',
-        last_name: profileData.last_name || ''
+        last_name: profileData.last_name || '',
+        username: profileData.username || '',
+        email: profileData.email || ''
       })
     }
   }, [profileData])
@@ -70,14 +78,37 @@ export default function ProfilePage() {
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSaving(true)
+    setEditError(null)
     try {
-      await authAPI.updateProfile(editData)
+      await authAPI.updateProfile({
+        first_name: editData.first_name,
+        last_name: editData.last_name,
+        username: editData.username
+      })
       setProfileData({ ...profileData, ...editData })
       setIsEditDialogOpen(false)
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to update profile", err)
+      setEditError(err.response?.data?.username?.[0] || "Failed to update profile. Username might be taken.")
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSavingPassword(true)
+    setPasswordError(null)
+    try {
+      await authAPI.changePassword(passwordData)
+      setIsPasswordDialogOpen(false)
+      setPasswordData({ old_password: '', new_password: '' })
+      alert("Password changed successfully!")
+    } catch (err: any) {
+      console.error("Failed to change password", err)
+      setPasswordError(err.response?.data?.old_password?.[0] || "Failed to change password.")
+    } finally {
+      setIsSavingPassword(false)
     }
   }
 
@@ -152,6 +183,25 @@ export default function ProfilePage() {
                     <DialogTitle>Edit Profile</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleEditSubmit} className="space-y-4 pt-4">
+                    {editError && <p className="text-sm text-red-500">{editError}</p>}
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input 
+                        id="email" 
+                        value={editData.email} 
+                        disabled 
+                        className="opacity-60 cursor-not-allowed"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Username</Label>
+                      <Input 
+                        id="username" 
+                        value={editData.username} 
+                        onChange={(e) => setEditData({...editData, username: e.target.value})} 
+                        required
+                      />
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="first_name">First Name</Label>
                       <Input 
@@ -168,8 +218,47 @@ export default function ProfilePage() {
                         onChange={(e) => setEditData({...editData, last_name: e.target.value})} 
                       />
                     </div>
-                    <Button type="submit" className="w-full" disabled={isSaving}>
-                      {isSaving ? "Saving..." : "Save Changes"}
+                    <div className="flex gap-2 w-full pt-2">
+                      <Button type="submit" className="flex-1" disabled={isSaving}>
+                        {isSaving ? "Saving..." : "Save Changes"}
+                      </Button>
+                      <Button type="button" variant="outline" onClick={() => setIsPasswordDialogOpen(true)}>
+                        Change Password
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Change Password</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handlePasswordSubmit} className="space-y-4 pt-4">
+                    {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
+                    <div className="space-y-2">
+                      <Label htmlFor="old_password">Current Password</Label>
+                      <Input 
+                        id="old_password" 
+                        type="password"
+                        value={passwordData.old_password} 
+                        onChange={(e) => setPasswordData({...passwordData, old_password: e.target.value})} 
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="new_password">New Password</Label>
+                      <Input 
+                        id="new_password" 
+                        type="password"
+                        value={passwordData.new_password} 
+                        onChange={(e) => setPasswordData({...passwordData, new_password: e.target.value})} 
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={isSavingPassword}>
+                      {isSavingPassword ? "Updating..." : "Update Password"}
                     </Button>
                   </form>
                 </DialogContent>

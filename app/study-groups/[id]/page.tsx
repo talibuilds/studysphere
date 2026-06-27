@@ -23,6 +23,7 @@ export default function StudyGroupDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isJoining, setIsJoining] = useState(false)
+  const [isLeaving, setIsLeaving] = useState(false)
 
   useEffect(() => {
     const fetchGroupData = async () => {
@@ -95,6 +96,21 @@ export default function StudyGroupDetailPage() {
     }
   }
 
+  const handleLeaveGroup = async () => {
+    try {
+      setIsLeaving(true)
+      await groupsAPI.leave(groupId)
+      const updatedGroup = await groupsAPI.getById(groupId)
+      setGroup(updatedGroup)
+      toast.success("Successfully left the study group.")
+    } catch (err: any) {
+      console.error("Failed to leave group:", err)
+      toast.error(err.response?.data?.detail || "Failed to leave group")
+    } finally {
+      setIsLeaving(false)
+    }
+  }
+
   if (loading) {
     return (
       <AppLayout>
@@ -120,8 +136,8 @@ export default function StudyGroupDetailPage() {
       </AppLayout>
     )
   }
-
-  const isMember = group.members?.some((m: any) => m.id === user?.id)
+  const isMember = group.is_member
+  const isCreator = group.creator === user?.id
 
   return (
     <AppLayout>
@@ -268,9 +284,25 @@ export default function StudyGroupDetailPage() {
           <div className="lg:col-span-1">
             <div className="glass-card p-6 rounded-lg sticky top-8 space-y-4">
               {isMember ? (
-                <div className="p-4 bg-primary/10 rounded-lg text-center">
-                  <CheckCircle size={24} className="text-primary mx-auto mb-2" />
-                  <p className="text-sm font-semibold">You're a member!</p>
+                <div className="p-4 bg-primary/10 rounded-lg text-center space-y-3 border border-primary/20">
+                  <div>
+                    <CheckCircle size={24} className="text-primary mx-auto mb-2" />
+                    <p className="text-sm font-semibold">You're a member!</p>
+                  </div>
+                  {!isCreator && (
+                    <Button 
+                      variant="destructive" 
+                      size="sm" 
+                      className="w-full" 
+                      onClick={handleLeaveGroup}
+                      disabled={isLeaving}
+                    >
+                      {isLeaving ? "Leaving..." : "Leave Group"}
+                    </Button>
+                  )}
+                  {isCreator && (
+                    <p className="text-xs text-muted-foreground mt-2">As the creator, you cannot leave this group.</p>
+                  )}
                 </div>
               ) : (
                 <Button

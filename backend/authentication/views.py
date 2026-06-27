@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from api.models import User
 from api.serializers import UserProfileSerializer
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, LoginSerializer, ChangePasswordSerializer
 
 
 class RegisterView(generics.CreateAPIView):
@@ -159,3 +159,24 @@ class GoogleLoginView(APIView):
         except Exception as e:
             return Response({'error': f'Failed to authenticate with Google: {str(e)}'}, status=status.HTTP_401_UNAUTHORIZED)
 
+
+class ChangePasswordView(generics.UpdateAPIView):
+    """Endpoint for changing password"""
+    serializer_class = ChangePasswordSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.get_object()
+        if not user.check_password(serializer.validated_data.get("old_password")):
+            return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+            
+        user.set_password(serializer.validated_data.get("new_password"))
+        user.save()
+        
+        return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)

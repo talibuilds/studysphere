@@ -111,6 +111,11 @@ export const authAPI = {
         return response.data;
     },
 
+    changePassword: async (passwordData: any) => {
+        const response = await apiClient.put('/auth/change-password/', passwordData);
+        return response.data;
+    },
+
     googleLogin: async (credential: string) => {
         const response = await apiClient.post('/auth/google/', { credential });
         const { tokens, user } = response.data;
