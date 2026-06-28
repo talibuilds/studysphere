@@ -2,27 +2,109 @@
 
 **StudySphere** is a premium, state-of-the-art student collaboration platform designed to make studying social, interactive, and gamified. Users can create study groups, schedule study sessions, share learning resources, chat in real-time, and earn XP and badges as they progress.
 
+Built for the students of BMSCE, StudySphere elevates education by bringing modern, interactive, and highly responsive web design to the academic experience.
+
 ---
 
-## 🚀 Key Features
+## 🚀 Modern Features & Implementations
 
-*   **Gamified Learning:** Dynamic user profiles with leveling (XP system) and earned badges.
-*   **Study Groups:** Collaborate on academic subjects with built-in admin approval moderation workflow.
-*   **Study Sessions:** Create and join study sessions with location tagging, RSVPs, and attendance verification.
-*   **Real-time Interaction:** Real-time session chats and shared session-resource lists.
-*   **Modern Visuals:** Responsive glassmorphism cards, premium dark mode styling, and smooth interactions.
+*   **Gamified Learning & Leaderboards:** Dynamic user profiles with leveling (XP system) and earned badges. Live global leaderboard showcasing top students with unique, auto-generated DiceBear avatars.
+*   **Next.js App Router Architecture:** Fully leverages Next.js 15+ App Router for seamless navigation, nested layouts, optimized loading states, and advanced routing patterns.
+*   **Study Groups:** Collaborate on academic subjects with a built-in admin approval moderation workflow. Groups feature distinct icons and detailed membership tracking.
+*   **Interactive Study Sessions:** Create and join study sessions with robust scheduling, location tagging, real-time RSVPs, and attendance verification.
+*   **Modern Premium Visuals:** Next-generation UI utilizing Tailwind CSS v4, custom glassmorphism, responsive data grids, smooth micro-interactions, dark/light mode toggle, and Lucide React iconography.
+*   **Production Ready Deployment:** Optimized for Vercel (Frontend) and Render/Supabase (Backend database hosting).
+
+---
+
+## 🏗️ App Architecture & ER Diagram
+
+The platform utilizes a decoupled architecture where a React-based Next.js client consumes a RESTful API provided by a Python Django server.
+
+### Entity Relationship (ER) Diagram
+
+```mermaid
+erDiagram
+    USER ||--o{ GROUP_MEMBERSHIP : "joins"
+    USER ||--o{ SESSION_RSVP : "attends"
+    USER ||--o{ STUDY_GROUP : "creates"
+    USER ||--o{ STUDY_SESSION : "hosts"
+    USER ||--o{ BADGE : "earns"
+    
+    STUDY_GROUP ||--o{ GROUP_MEMBERSHIP : "has"
+    STUDY_GROUP ||--o{ STUDY_SESSION : "organizes"
+    
+    STUDY_SESSION ||--o{ SESSION_RSVP : "tracks"
+
+    USER {
+        int id PK
+        string username
+        string email
+        string first_name
+        string last_name
+        int xp
+        int level
+        string image
+    }
+
+    STUDY_GROUP {
+        int id PK
+        string name
+        string subject
+        string description
+        string icon
+        string status
+        int creator_id FK
+    }
+
+    STUDY_SESSION {
+        int id PK
+        string title
+        string course_code
+        string date
+        string time
+        string location
+        string verification_code
+        int host_id FK
+        int group_id FK
+    }
+
+    BADGE {
+        int id PK
+        string name
+        string icon
+        string color
+        string bg_color
+        int user_id FK
+    }
+
+    GROUP_MEMBERSHIP {
+        int id PK
+        datetime joined_at
+        int user_id FK
+        int group_id FK
+    }
+
+    SESSION_RSVP {
+        int id PK
+        boolean attended
+        int user_id FK
+        int session_id FK
+    }
+```
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Component | Technology | Description |
+| Layer | Technology | Description |
 | :--- | :--- | :--- |
-| **Frontend Core** | Next.js 16 (React 19), Radix UI | Performance-optimized React frameworks and accessible UI primitives |
-| **Styling** | Tailwind CSS 4 | Modern utility-first CSS styling and custom glassmorphic properties |
-| **Backend API** | Django 4.2, Django REST Framework | Robust REST endpoints and business logic handler |
-| **Auth** | Simple JWT | Secure stateless authentication token management |
-| **Database** | SQLite / PostgreSQL | Local file database with seamless migrations |
+| **Frontend Framework** | Next.js (App Router) | High-performance React framework with SSR and static generation |
+| **Styling & UI** | Tailwind CSS v4, Radix UI | Modern utility-first styling and accessible UI primitives |
+| **Backend API** | Django 4.2, DRF | Robust Python-based REST endpoints and business logic |
+| **Authentication** | Simple JWT | Secure, stateless authentication token management |
+| **Database** | Supabase (PostgreSQL) | Scalable production database with seamless Django integration |
+| **Deployment** | Vercel & Render | Automated, highly-available CI/CD pipelines |
 
 ---
 
@@ -31,14 +113,17 @@
 ```
 studysphere/
 ├── app/                  # Next.js App Router (pages, layouts, globals)
-├── components/           # Reusable UI components (buttons, dialogs, cards)
-├── lib/                  # Application library (API Axios clients, auth state providers)
-├── public/               # Static assets & public icons
-├── styles/               # Legacy global CSS definitions
-└── backend/              # Django Python project directory
-    ├── api/              # Core API app (models, views, serializers, tests)
-    ├── authentication/   # Custom Auth controller overrides
-    └── studysphere/      # Main Django project settings & URL routes
+│   ├── (auth)/           # Authentication routes
+│   ├── dashboard/        # Authenticated student dashboard
+│   ├── discover/         # Explore study sessions
+│   └── leaderboard/      # Global gamified rankings
+├── components/           # Reusable UI components (buttons, dialogs, cards, layouts)
+├── lib/                  # Application library (API Axios clients, context providers)
+├── backend/              # Django Python project directory
+│   ├── api/              # Core API app (models, views, serializers, seed scripts)
+│   ├── authentication/   # Custom Auth controller overrides
+│   └── studysphere/      # Main Django project settings & URL routes
+└── package.json          # Frontend dependencies and scripts
 ```
 
 ---
@@ -46,13 +131,12 @@ studysphere/
 ## 💻 Getting Started (Frontend)
 
 ### Prerequisites
-
 *   **Node.js** (v20+ recommended)
 *   **npm** or **pnpm**
 
 ### Installation & Run
 
-1.  **Install dependencies** using legacy peer-deps to resolve React 19 package matching:
+1.  **Install dependencies** using legacy peer-deps to resolve strict React package matching:
     ```bash
     npm install --legacy-peer-deps
     ```
@@ -64,19 +148,11 @@ studysphere/
 
 3.  Open [http://localhost:3000](http://localhost:3000) to view the client.
 
-### Production Build
-
-```bash
-npm run build
-npm start
-```
-
 ---
 
 ## 🐍 Getting Started (Backend)
 
 ### Prerequisites
-
 *   **Python 3.12+**
 *   **pip**
 
@@ -100,11 +176,11 @@ npm start
 4.  **Create your local environment file**:
     Create a `.env` file (copied from `.env.example`) and edit accordingly:
     ```env
-    DATABASE_URL=sqlite:///db.sqlite3
+    DATABASE_URL=postgres://your-supabase-db-url
     SECRET_KEY=your-super-secret-key-here
     DEBUG=True
-    ALLOWED_HOSTS=localhost,127.0.0.1
-    CORS_ALLOWED_ORIGINS=http://localhost:3000
+    ALLOWED_HOSTS=localhost,127.0.0.1,.onrender.com
+    CORS_ALLOWED_ORIGINS=http://localhost:3000,https://your-vercel-app.vercel.app
     ```
 
 5.  **Run database migrations**:
@@ -112,13 +188,10 @@ npm start
     python manage.py migrate
     ```
 
-6.  **Seed sample data** (users, study groups, sessions, badges):
+6.  **Seed robust sample data** (users, study groups, sessions, badges):
     ```bash
     python manage.py seed
     ```
-    *Seeding creates standard test credentials:*
-    *   **Admin User:** `admin` / `admin123`
-    *   **Standard Student User:** `razancodes` / `password123` (or `razan` / `password123@#`)
 
 7.  **Start the Django REST server**:
     ```bash
@@ -148,53 +221,15 @@ XP points are awarded dynamically based on student participation:
 
 ---
 
-## ⚡ API Endpoints Reference
+## 🤝 Contributors
 
-All API calls must include the authorization header where authentication is required:
-`Authorization: Bearer <jwt_access_token>`
-
-### Auth & User endpoints
-*   `POST /api/auth/register/` - Create a student profile
-*   `POST /api/auth/login/` - Acquire JWT access and refresh tokens
-*   `POST /api/auth/refresh/` - Renew expired access tokens
-*   `GET /api/auth/me/` - Retrieve details of the current logged-in user
-
-### Study Sessions
-*   `GET /api/sessions/` - Retrieve available study sessions
-*   `POST /api/sessions/` - Create a new study session (`+50 XP` host reward)
-*   `GET /api/sessions/{id}/` - Detailed session information
-*   `POST /api/sessions/{id}/rsvp/` - RSVP to attend the session
-*   `POST /api/sessions/{id}/mark_attendance/` - Submit verification code to mark attendance (`+100 XP` reward)
-
-### Study Groups
-*   `GET /api/groups/` - List all approved groups
-*   `POST /api/groups/` - Propose a new group (creates a pending approval request)
-*   `POST /api/groups/{id}/join/` - Join an approved group (`+25 XP`)
-
-### Leaderboard & Gamification
-*   `GET /api/leaderboard/?period=week` - Retrieve leaderboard rankings for the current week
-*   `GET /api/leaderboard/?period=all` - Retrieve all-time rankings
-
-### Admin Dashboard (Staff Only)
-*   `GET /api/admin/groups/` - View pending/approved/rejected group queries
-*   `PATCH /api/admin/groups/{id}/approve/` - Approve and publish a group request
-*   `PATCH /api/admin/groups/{id}/reject/` - Reject a group request
-
----
-
-## ⚙️ Development & Production Commands
-
-| Task | Command |
-| :--- | :--- |
-| **Frontend Dev** | `npm run dev` |
-| **Frontend Lint** | `npm run lint` |
-| **Backend Shell** | `python manage.py shell` |
-| **Run Migrations** | `python manage.py migrate` |
-| **Check Backend** | `python manage.py check` |
-| **View Migrations** | `python manage.py showmigrations` |
+Built with ❤️ by:
+*   [Talibuilds](https://github.com/talibuilds)
+*   [Razancodes](https://github.com/razancodes)
+*   [Mayankmehta](https://github.com/maayaankmehta)
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
