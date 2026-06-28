@@ -91,8 +91,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-auto">
-        <div className="px-8 py-6">{children}</div>
+      <main className="flex-1 flex flex-col overflow-auto relative bg-background">
+        <div className="flex-1 px-8 py-6">{children}</div>
+        
+        {/* Global Footer */}
+        <footer className="w-full py-4 px-8 border-t border-border/40 mt-auto text-sm text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>© 2026 StudySphere BMSCE. Elevating Education.</p>
+          <p className="flex items-center gap-1">
+            Built by{' '}
+            <a href="https://github.com/talibuilds" target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:text-primary transition-colors">Talibuilds</a>{' '}|{' '}
+            <a href="https://github.com/razancodes" target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:text-primary transition-colors">Razancodes</a>{' '}|{' '}
+            <a href="https://github.com/maayaankmehta" target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:text-primary transition-colors">Mayankmehta</a>
+          </p>
+        </footer>
       </main>
     </div>
   )

@@ -24,7 +24,7 @@ class Command(BaseCommand):
         
         users_data = [
             ('razancodes', 'password123', 'Muhammed', 'Razan', 1250, 3, 'Henry'),
-            ('talibkhan', 'password123', 'Talib', 'Khan', 620, 2, 'james'),
+            ('talibkhan', 'password123', 'Talib', 'Khan', 2500, 5, 'james'),
             ('mayank', 'password123', 'Mayank', 'Mehta', 890, 2, 'Human'),
             ('muzammil', 'password123', 'Muzammil', 'Zahoor', 750, 2, 'Rashford'),
             ('jensen', 'password123', 'Jensen', 'Huang', 1120, 3, 'frizzle'),

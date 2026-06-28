@@ -459,12 +459,21 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-border/40 py-12 px-6 bg-background/80 backdrop-blur-md relative z-10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2 text-xl font-bold text-primary">
             <Logo className="w-6 h-6" />
             StudySphere
           </div>
-          <p className="text-muted-foreground text-sm font-medium">© 2026 StudySphere BMSCE. Elevating Education.</p>
+          <div className="flex flex-col md:flex-row items-center gap-4 text-sm text-muted-foreground text-center md:text-right">
+            <p className="font-medium">© 2026 StudySphere BMSCE. Elevating Education.</p>
+            <div className="hidden md:block w-px h-4 bg-border/60"></div>
+            <p className="flex items-center gap-1">
+              Built by{' '}
+              <a href="https://github.com/talibuilds" target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:text-primary transition-colors">Talibuilds</a>{' '}|{' '}
+              <a href="https://github.com/razancodes" target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:text-primary transition-colors">Razancodes</a>{' '}|{' '}
+              <a href="https://github.com/maayaankmehta" target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:text-primary transition-colors">Mayankmehta</a>
+            </p>
+          </div>
         </div>
       </footer>
     </main>
