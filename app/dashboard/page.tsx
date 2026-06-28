@@ -115,7 +115,7 @@ export default function DashboardPage() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && upcomingSessions.length === 0 && (
+        {isAuthenticated && !loading && !error && upcomingSessions.length === 0 && (
           <div className="text-center py-20 glass rounded-lg p-12 border border-border">
             <div className="flex justify-center mb-5">
               <div className="p-4 rounded-full bg-primary/10">
