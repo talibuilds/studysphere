@@ -1,12 +1,12 @@
 from django.core.management.base import BaseCommand
 from api.models import User, StudyGroup, StudySession, GroupMembership, SessionRSVP, Badge
-
+from datetime import datetime, timedelta
 
 class Command(BaseCommand):
-    help = 'Seed database with sample data'
+    help = 'Seed database with robust sample data'
 
     def handle(self, *args, **kwargs):
-        self.stdout.write('Seeding database...')
+        self.stdout.write('Seeding database with robust data...')
         
         # Clear existing data
         self.stdout.write('Clearing existing data...')
@@ -17,301 +17,109 @@ class Command(BaseCommand):
         StudyGroup.objects.all().delete()
         User.objects.all().delete()
         
-        # Create users
+        # 1. CREATE USERS
         self.stdout.write('Creating users...')
         
-        # Create admin user
-        admin = User.objects.create_superuser(
-            username='admin',
-            email='admin@studysphere.com',
-            password='admin123',
-            first_name='Admin',
-            last_name='User',
-            xp=5000,
-            level=5
-        )
+        admin = User.objects.create_superuser('admin', 'admin@studysphere.com', 'admin123', first_name='Admin', last_name='User', xp=5000, level=5)
         
-        # Create regular users
-        razan = User.objects.create_user(
-            username='razancodes',
-            email='razan@example.com',
-            password='password123',
-            first_name='Muhammed',
-            last_name='Razan',
-            xp=1250,
-            level=3,
-            image='https://api.dicebear.com/9.x/avataaars/svg?seed=Henry'
-        )
+        users_data = [
+            ('razancodes', 'password123', 'Muhammed', 'Razan', 1250, 3, 'Henry'),
+            ('talibkhan', 'password123', 'Talib', 'Khan', 620, 2, 'james'),
+            ('mayank', 'password123', 'Mayank', 'Mehta', 890, 2, 'Human'),
+            ('muzammil', 'password123', 'Muzammil', 'Zahoor', 750, 2, 'Rashford'),
+            ('jensen', 'password123', 'Jensen', 'Huang', 1120, 3, 'frizzle'),
+            ('steve', 'password123', 'Steve', 'Jobs', 980, 2, 'Punjab'),
+            ('sarahd', 'password123', 'Sarah', 'Davis', 1400, 4, 'Sarah'),
+            ('mikew', 'password123', 'Michael', 'Wilson', 300, 1, 'Mike'),
+            ('emmaj', 'password123', 'Emma', 'Johnson', 2100, 5, 'Emma'),
+            ('davidb', 'password123', 'David', 'Brown', 850, 2, 'David'),
+            ('lisam', 'password123', 'Lisa', 'Miller', 1100, 3, 'Lisa'),
+            ('robertg', 'password123', 'Robert', 'Garcia', 450, 1, 'Robert')
+        ]
         
-        talib = User.objects.create_user(
-            username='talibkhan',
-            email='talib@example.com',
-            password='password123',
-            first_name='Talib',
-            last_name='Khan',
-            xp=620,
-            level=2,
-            image='https://api.dicebear.com/9.x/avataaars/svg?seed=james'
-        )
-        
-        mayank = User.objects.create_user(
-            username='mayank',
-            email='mayank@example.com',
-            password='password123',
-            first_name='Mayank',
-            last_name='Mehta',
-            xp=890,
-            level=2,
-            image='https://api.dicebear.com/9.x/avataaars/svg?seed=Human'
-        )
-        
-        muzammil = User.objects.create_user(
-            username='muzammil',
-            email='muzammil@example.com',
-            password='password123',
-            first_name='Muzammil',
-            last_name='Zahoor',
-            xp=750,
-            level=2,
-            image='https://api.dicebear.com/7.x/avataaars/svg?seed=Rashford'
-        )
-        
-        jensen = User.objects.create_user(
-            username='jensen',
-            email='jensen@example.com',
-            password='password123',
-            first_name='Jensen',
-            last_name='Huang',
-            xp=1120,
-            level=3,
-            image='https://api.dicebear.com/9.x/avataaars/svg?top=frizzle'
-        )
-        
-        steve = User.objects.create_user(
-            username='steve',
-            email='steve@example.com',
-            password='password123',
-            first_name='Steve',
-            last_name='Jobs',
-            xp=980,
-            level=2,
-            image='https://api.dicebear.com/7.x/avataaars/svg?seed=Punjab'
-        )
-        
-        # Create study groups (approved)
+        user_objs = {}
+        for u in users_data:
+            user_objs[u[0]] = User.objects.create_user(
+                username=u[0], password=u[1], first_name=u[2], last_name=u[3], 
+                xp=u[4], level=u[5], image=f'https://api.dicebear.com/9.x/avataaars/svg?seed={u[6]}'
+            )
+
+        # 2. CREATE STUDY GROUPS
         self.stdout.write('Creating study groups...')
         
-        group1 = StudyGroup.objects.create(
-            name='Team StudySphere',
-            subject='22CS3AEFWD',
-            description='Deep dive into React JS, FASTAPI and Django.',
-            creator=razan,
-            status='approved'
-        )
-        GroupMembership.objects.create(user=razan, group=group1)
-        GroupMembership.objects.create(user=mayank, group=group1)
-        GroupMembership.objects.create(user=muzammil, group=group1)
+        groups_data = [
+            ('Full Stack Web Dev', '22CS3AEFWD', 'Deep dive into React JS, FASTAPI and Django.', 'code', 'razancodes', ['mayank', 'muzammil', 'sarahd', 'emmaj']),
+            ('Data Science & Analytics', '23CS4PCDSA', 'Data analysis, pandas, numpy, and visualization.', 'pie-chart', 'emmaj', ['davidb', 'lisam', 'mikew', 'steve']),
+            ('Cyber Security Club', '23CS5PECYB', 'Ethical hacking, network security, and cryptography.', 'shield', 'sarahd', ['robertg', 'talibkhan', 'jensen']),
+            ('AI & Machine Learning', '23CS6PCMAL', 'Neural networks, PyTorch, TensorFlow and AI models.', 'monitor', 'mayank', ['razancodes', 'jensen', 'sarahd', 'lisam']),
+            ('UI/UX Design Society', '23CS4PEUIX', 'Figma, user research, wireframing, and prototyping.', 'pen-tool', 'lisam', ['emmaj', 'robertg', 'talibkhan']),
+            ('Math Wizards', '23MA3BSSDM', 'Probability, statistics, and discrete mathematics.', 'book-open', 'talibkhan', ['steve', 'davidb', 'muzammil']),
+            ('Cloud Computing', '23CS7PECLD', 'AWS, Docker, Kubernetes, and serverless architecture.', 'cloud', 'jensen', ['sarahd', 'razancodes', 'mikew']),
+            ('Java & Algorithms', '23CS3PCOOJ', 'Object-oriented programming and advanced DSA in Java.', 'code', 'muzammil', ['mayank', 'jensen', 'robertg'])
+        ]
         
-        group2 = StudyGroup.objects.create(
-            name='Statistics and Discrete Maths',
-            subject='23MA3BSSDM',
-            description='Collaborative learning space for probability and stats concepts, problem-solving, and exam prep.',
-            creator=talib,
-            status='approved'
-        )
-        GroupMembership.objects.create(user=talib, group=group2)
-        GroupMembership.objects.create(user=steve, group=group2)
-        
-        group3 = StudyGroup.objects.create(
-            name='Java Coding Club',
-            subject='23CS3PCOOJ',
-            description='Led by Faculty Monisha H M for learning developing Java Applications',
-            creator=razan,
-            status='approved'
-        )
-        GroupMembership.objects.create(user=razan, group=group3)
-        GroupMembership.objects.create(user=jensen, group=group3)
-        GroupMembership.objects.create(user=muzammil, group=group3)
-        
-        group4 = StudyGroup.objects.create(
-            name='Data Structures',
-            subject='23CS3PCDST',
-            description='Explore Data Structures, and How they work together.',
-            creator=muzammil,
-            status='approved'
-        )
-        GroupMembership.objects.create(user=muzammil, group=group4)
-        GroupMembership.objects.create(user=mayank, group=group4)
-        
-        group5 = StudyGroup.objects.create(
-            name='Machine Learning gang',
-            subject='23CS6PCMAL',
-            description='Advanced machine learning techniques, neural networks, and AI project discussions.',
-            creator=mayank,
-            status='approved'
-        )
-        GroupMembership.objects.create(user=mayank, group=group5)
-        GroupMembership.objects.create(user=razan, group=group5)
-        GroupMembership.objects.create(user=jensen, group=group5)
-        
-        # Create pending groups
-        StudyGroup.objects.create(
-            name='Full stack web dev club',
-            subject='22CS3AEFWD',
-            description='For students interested in full stack web development',
-            creator=muzammil,
-            status='pending'
-        )
-        
-        StudyGroup.objects.create(
-            name='Java Study Group',
-            subject='23CS3PCOOJ',
-            description='Collaborative study group for Java fundamentals',
-            creator=mayank,
-            status='pending'
-        )
-        
-        # Create study sessions
+        group_objs = {}
+        for g in groups_data:
+            group = StudyGroup.objects.create(
+                name=g[0], subject=g[1], description=g[2], icon=g[3],
+                creator=user_objs[g[4]], status='approved'
+            )
+            group_objs[g[0]] = group
+            GroupMembership.objects.create(user=user_objs[g[4]], group=group) # Creator joins
+            for member in g[5]:
+                GroupMembership.objects.create(user=user_objs[member], group=group)
+
+        # 3. CREATE STUDY SESSIONS
         self.stdout.write('Creating study sessions...')
         
-        session1 = StudySession.objects.create(
-            title='Full Stack Web Development',
-            course_code='22CS3AEFWD',
-            description='Join us for an in-depth study of FWD covered in this semester. We\'ll go through React for frontend, Django for backend, FASTAPI for connecting API, and more.',
-            date='Wednesday, October 22nd',
-            time='8:00 AM - 10:00 AM',
-            location='CSE-UG LAB2',
-            host=razan,
-            group=group1
-        )
-        SessionRSVP.objects.create(user=razan, session=session1)
-        SessionRSVP.objects.create(user=mayank, session=session1)
-        SessionRSVP.objects.create(user=muzammil, session=session1)
-        SessionRSVP.objects.create(user=jensen, session=session1)
-        
-        session2 = StudySession.objects.create(
-            title='Probability Practice',
-            course_code='23MA3BSSDM',
-            description='Practice problems for probability and statistics',
-            date='October 23',
-            time='1:00 PM - 2:00 PM',
-            location='Reference Section, 1st Floor PJA Block',
-            host=talib,
-            group=group2
-        )
-        SessionRSVP.objects.create(user=talib, session=session2)
-        SessionRSVP.objects.create(user=steve, session=session2)
-        SessionRSVP.objects.create(user=razan, session=session2)
-        
-        session3 = StudySession.objects.create(
-            title='Java Coding Session (cie-1)',
-            course_code='23CS3PCOOJ',
-            description='Prepare for CIE-1 with practice coding problems',
-            date='October 25',
-            time='3:00 PM - 5:00 PM',
-            location='CSE Dept, Room 102',
-            host=razan,
-            group=group3
-        )
-        SessionRSVP.objects.create(user=razan, session=session3)
-        SessionRSVP.objects.create(user=muzammil, session=session3)
-        SessionRSVP.objects.create(user=jensen, session=session3)
-        
-        session4 = StudySession.objects.create(
-            title='Computer Architecture Revision',
-            course_code='23CS3ESCOA',
-            description='Review computer architecture concepts',
-            date='October 26',
-            time='10:00 AM - 12:00 PM',
-            location='CSE-UG LAB1',
-            host=muzammil
-        )
-        SessionRSVP.objects.create(user=muzammil, session=session4)
-        SessionRSVP.objects.create(user=mayank, session=session4)
-        
-        session5 = StudySession.objects.create(
-            title='Database Queries Workshop',
-            course_code='23CS3PCDBM',
-            description='Practice SQL queries and database design',
-            date='October 28',
-            time='9:00 AM - 11:00 AM',
-            location='CSE-UG LAB3',
-            host=razan
-        )
-        SessionRSVP.objects.create(user=razan, session=session5)
-        SessionRSVP.objects.create(user=steve, session=session5)
-        
-        session6 = StudySession.objects.create(
-            title='Data Structures & Algorithms Bootcamp',
-            course_code='23CS3PCDST',
-            description='Intensive DSA practice session',
-            date='October 29',
-            time='11:00 AM - 1:00 PM',
-            location='Reference Section, 2nd Floor PJA Block',
-            host=muzammil,
-            group=group4
-        )
-        SessionRSVP.objects.create(user=muzammil, session=session6)
-        SessionRSVP.objects.create(user=mayank, session=session6)
-        SessionRSVP.objects.create(user=razan, session=session6)
-        
-        # Create badges
+        today = datetime.now()
+        dates = {
+            'today': today.strftime("%A, %B %d"),
+            'tomorrow': (today + timedelta(days=1)).strftime("%A, %B %d"),
+            'next_week': (today + timedelta(days=7)).strftime("%A, %B %d"),
+        }
+
+        sessions_data = [
+            ('React Context API Deep Dive', '22CS3AEFWD', 'Understanding state management with React Context API and hooks.', dates['today'], '2:00 PM - 4:00 PM', 'CSE-UG LAB2', 'razancodes', 'Full Stack Web Dev', ['mayank', 'emmaj']),
+            ('Pandas Crash Course', '23CS4PCDSA', 'Data cleaning and preparation using Python Pandas library.', dates['tomorrow'], '10:00 AM - 12:00 PM', 'Reference Section, Library', 'emmaj', 'Data Science & Analytics', ['steve', 'mikew']),
+            ('Intro to Cryptography', '23CS5PECYB', 'Symmetric and asymmetric encryption basics.', dates['next_week'], '3:00 PM - 5:00 PM', 'PJA Block, Room 302', 'sarahd', 'Cyber Security Club', ['talibkhan', 'jensen', 'robertg']),
+            ('Building Neural Networks', '23CS6PCMAL', 'Hands-on session building a simple neural network from scratch.', dates['today'], '5:00 PM - 7:00 PM', 'CSE-UG LAB1', 'mayank', 'AI & Machine Learning', ['razancodes', 'lisam']),
+            ('Figma Prototyping Workshop', '23CS4PEUIX', 'Interactive prototyping and animations in Figma.', dates['tomorrow'], '1:00 PM - 3:00 PM', 'Design Studio, Arch Block', 'lisam', 'UI/UX Design Society', ['emmaj', 'talibkhan']),
+            ('Probability Distributions', '23MA3BSSDM', 'Normal, Binomial, and Poisson distributions.', dates['next_week'], '9:00 AM - 11:00 AM', 'PJA Block, Room 104', 'talibkhan', 'Math Wizards', ['steve', 'davidb']),
+            ('Docker for Beginners', '23CS7PECLD', 'Containerization concepts and writing your first Dockerfile.', dates['today'], '11:00 AM - 1:00 PM', 'CSE-UG LAB3', 'jensen', 'Cloud Computing', ['razancodes', 'sarahd']),
+            ('Graphs and Trees', '23CS3PCOOJ', 'Graph traversal algorithms (BFS, DFS) in Java.', dates['tomorrow'], '4:00 PM - 6:00 PM', 'CSE-UG LAB2', 'muzammil', 'Java & Algorithms', ['mayank', 'robertg']),
+            ('Portfolio Review', '23CS4PEUIX', 'Bring your UI/UX portfolios for peer feedback.', dates['next_week'], '2:00 PM - 4:00 PM', 'Design Studio, Arch Block', 'lisam', 'UI/UX Design Society', ['robertg']),
+            ('Next.js App Router', '22CS3AEFWD', 'Migrating from pages to app router in Next.js.', dates['tomorrow'], '6:00 PM - 8:00 PM', 'Virtual (Google Meet)', 'emmaj', 'Full Stack Web Dev', ['razancodes', 'muzammil', 'sarahd'])
+        ]
+
+        for s in sessions_data:
+            session = StudySession.objects.create(
+                title=s[0], course_code=s[1], description=s[2], date=s[3], time=s[4],
+                location=s[5], host=user_objs[s[6]], group=group_objs[s[7]]
+            )
+            SessionRSVP.objects.create(user=user_objs[s[6]], session=session) # Host RSVPs automatically
+            for attendee in s[8]:
+                SessionRSVP.objects.create(user=user_objs[attendee], session=session)
+
+        # 4. CREATE BADGES
         self.stdout.write('Creating badges...')
         
-        Badge.objects.create(
-            name='Rising Star',
-            icon='Zap',
-            color='text-purple-500',
-            bg_color='bg-purple-500/20',
-            user=razan
-        )
-        
-        Badge.objects.create(
-            name='Knowledge Seeker',
-            icon='BookOpen',
-            color='text-blue-500',
-            bg_color='bg-blue-500/20',
-            user=jensen
-        )
-        
-        Badge.objects.create(
-            name='Team Player',
-            icon='Users',
-            color='text-green-500',
-            bg_color='bg-green-500/20',
-            user=steve
-        )
-        
-        Badge.objects.create(
-            name='Study Buddy',
-            icon='BookOpen',
-            color='text-cyan-500',
-            bg_color='bg-cyan-500/20',
-            user=mayank
-        )
-        
-        Badge.objects.create(
-            name='Initiator',
-            icon='Zap',
-            color='text-yellow-500',
-            bg_color='bg-yellow-500/20',
-            user=muzammil
-        )
-        
-        Badge.objects.create(
-            name='Weekend Warrior',
-            icon='Target',
-            color='text-red-500',
-            bg_color='bg-red-500/20',
-            user=talib
-        )
-        
-        self.stdout.write(self.style.SUCCESS('Successfully seeded database!'))
+        badges_data = [
+            ('Rising Star', 'Zap', 'text-purple-500', 'bg-purple-500/20', ['razancodes', 'lisam', 'davidb']),
+            ('Knowledge Seeker', 'BookOpen', 'text-blue-500', 'bg-blue-500/20', ['jensen', 'emmaj']),
+            ('Team Player', 'Users', 'text-green-500', 'bg-green-500/20', ['steve', 'sarahd']),
+            ('Study Buddy', 'BookOpen', 'text-cyan-500', 'bg-cyan-500/20', ['mayank', 'muzammil']),
+            ('Weekend Warrior', 'Target', 'text-red-500', 'bg-red-500/20', ['talibkhan', 'robertg', 'mikew'])
+        ]
+
+        for b in badges_data:
+            for username in b[4]:
+                Badge.objects.create(
+                    name=b[0], icon=b[1], color=b[2], bg_color=b[3], user=user_objs[username]
+                )
+
+        self.stdout.write(self.style.SUCCESS('Successfully seeded database with rich data!'))
         self.stdout.write(f'Created {User.objects.count()} users')
         self.stdout.write(f'Created {StudyGroup.objects.count()} groups')
         self.stdout.write(f'Created {StudySession.objects.count()} sessions')
         self.stdout.write(f'Created {Badge.objects.count()} badges')
-        self.stdout.write('')
-        self.stdout.write('Test credentials:')
-        self.stdout.write('Admin: admin / admin123')
-        self.stdout.write('User: razancodes / password123')
