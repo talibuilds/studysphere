@@ -219,7 +219,7 @@ class PasswordResetRequestView(APIView):
         send_mail(
             subject='StudySphere - Password Reset Verification Code',
             message=f'Hi {user.username},\n\nYour password reset verification code is: {otp}\n\nThis code will expire in 15 minutes.\n\nBest,\nStudySphere Team',
-            from_email='support@studysphere.com',
+            from_email=None,
             recipient_list=[email],
             fail_silently=False,
         )
