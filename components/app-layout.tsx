@@ -3,7 +3,7 @@
 import type React from "react"
 import Link from "next/link"
 import { usePathname } from 'next/navigation'
-import { BrainCircuit, LayoutDashboard, Search, Trophy, User, Moon, BookOpen, Menu } from 'lucide-react'
+import { BrainCircuit, LayoutDashboard, Search, Trophy, User, Moon, BookOpen, Menu, LogOut } from 'lucide-react'
 import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -19,7 +19,7 @@ interface AppLayoutProps {
 export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname()
   const { isDark, toggleTheme } = useTheme()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, logout } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
 
   const navItems = [
@@ -79,15 +79,28 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-center gap-2 h-9"
-          onClick={toggleTheme}
-        >
-          <Moon size={16} />
-          <span className="text-xs font-medium">{isDark ? "Light" : "Dark"}</span>
-        </Button>
+        <div className="flex gap-2 w-full">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-1 justify-center gap-2 h-9"
+            onClick={toggleTheme}
+          >
+            <Moon size={16} />
+            <span className="text-xs font-medium">{isDark ? "Light" : "Dark"}</span>
+          </Button>
+          {isAuthenticated && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex-1 justify-center gap-2 h-9 text-red-500 hover:text-red-600 hover:bg-red-500/10"
+              onClick={logout}
+            >
+              <LogOut size={16} />
+              <span className="text-xs font-medium">Logout</span>
+            </Button>
+          )}
+        </div>
       </div>
     </>
   )
