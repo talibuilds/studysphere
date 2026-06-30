@@ -238,7 +238,7 @@ export default function AuthPage() {
             <TabsContent value="login" className="animate-in fade-in-50 duration-500">
               <form onSubmit={handleLogin} className="space-y-5">
                 <div className="space-y-1.5">
-                  <Label htmlFor="login-username" className="text-slate-300 text-xs font-semibold ml-1">Username</Label>
+                  <Label htmlFor="login-username" className="text-slate-300 text-xs font-semibold ml-1">Username or Email</Label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
                       <User size={18} />
@@ -246,7 +246,7 @@ export default function AuthPage() {
                     <Input
                       id="login-username"
                       type="text"
-                      placeholder="Enter your username"
+                      placeholder="Enter your username or email"
                       value={loginData.username}
                       onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
                       required
