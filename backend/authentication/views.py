@@ -215,32 +215,35 @@ class PasswordResetRequestView(APIView):
         # Save to database
         PasswordResetOTP.objects.create(user=user, otp=otp)
 
-        # Send email
+        # Send email via Vercel proxy to bypass Render SMTP block
         try:
-            from django.conf import settings as django_settings
+            import requests
             import logging
             logger = logging.getLogger(__name__)
-            logger.info(f"Attempting to send OTP email to {email}")
-            logger.info(f"EMAIL_BACKEND: {django_settings.EMAIL_BACKEND}")
-            logger.info(f"EMAIL_HOST: {getattr(django_settings, 'EMAIL_HOST', 'NOT SET')}")
-            logger.info(f"EMAIL_HOST_USER: {getattr(django_settings, 'EMAIL_HOST_USER', 'NOT SET')}")
-            logger.info(f"DEFAULT_FROM_EMAIL: {getattr(django_settings, 'DEFAULT_FROM_EMAIL', 'NOT SET')}")
+            logger.info(f"Attempting to send OTP email to {email} via Vercel proxy")
 
-            send_mail(
-                subject='StudySphere - Password Reset Verification Code',
-                message=f'Hi {user.username},\n\nYour password reset verification code is: {otp}\n\nThis code will expire in 15 minutes.\n\nBest,\nStudySphere Team',
-                from_email=None,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-            logger.info(f"OTP email sent successfully to {email}")
+            proxy_url = "https://studyspheres.vercel.app/api/send-email"
+            payload = {
+                "to": email,
+                "subject": "StudySphere - Password Reset Verification Code",
+                "text": f"Hi {user.username},\n\nYour password reset verification code is: {otp}\n\nThis code will expire in 15 minutes.\n\nBest,\nStudySphere Team",
+                "api_secret": "studysphere_super_secret_proxy_key_123"
+            }
+            
+            response = requests.post(proxy_url, json=payload, timeout=15)
+            response.raise_for_status()
+            logger.info(f"OTP email sent successfully to {email} via proxy")
+            
         except Exception as e:
             import traceback
             logger = logging.getLogger(__name__)
-            logger.error(f"Failed to send OTP email: {str(e)}")
+            error_details = str(e)
+            if hasattr(e, 'response') and e.response is not None:
+                error_details += f" Response: {e.response.text}"
+            logger.error(f"Failed to send OTP email via proxy: {error_details}")
             logger.error(traceback.format_exc())
             return Response(
-                {"detail": f"Email delivery failed: {str(e)}"},
+                {"detail": f"Email delivery failed: {error_details}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
