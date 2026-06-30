@@ -6,9 +6,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { to, subject, text, api_secret } = body;
 
-    // A simple hardcoded secret to prevent unauthorized use of this endpoint
-    // In production, this should ideally be in process.env.EMAIL_API_SECRET
-    const EXPECTED_SECRET = "studysphere_super_secret_proxy_key_123";
+    const EXPECTED_SECRET = process.env.EMAIL_API_SECRET || "default_insecure_secret_change_me_in_prod";
 
     if (api_secret !== EXPECTED_SECRET) {
       return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
@@ -27,13 +25,13 @@ export async function POST(req: Request) {
       port: 465,
       secure: true, // true for 465, false for other ports
       auth: {
-        user: process.env.EMAIL_HOST_USER || "talibslab@gmail.com",
-        pass: process.env.EMAIL_HOST_PASSWORD || "xakhzjnoujqbwwum",
+        user: process.env.EMAIL_HOST_USER,
+        pass: process.env.EMAIL_HOST_PASSWORD,
       },
     });
 
     const info = await transporter.sendMail({
-      from: `"StudySphere Support" <${process.env.EMAIL_HOST_USER || "talibslab@gmail.com"}>`,
+      from: `"StudySphere Support" <${process.env.EMAIL_HOST_USER}>`,
       to,
       subject,
       text,

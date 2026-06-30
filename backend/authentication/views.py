@@ -236,12 +236,13 @@ class PasswordResetRequestView(APIView):
             logger = logging.getLogger(__name__)
             logger.info(f"Attempting to send OTP email to {email} via Vercel proxy")
 
+            import os
             proxy_url = "https://studyspheres.vercel.app/api/send-email"
             payload = {
                 "to": email,
                 "subject": "StudySphere - Password Reset Verification Code",
                 "text": f"Hi {user.username},\n\nYour password reset verification code is: {otp}\n\nThis code will expire in 15 minutes.\n\nBest,\nStudySphere Team",
-                "api_secret": "studysphere_super_secret_proxy_key_123"
+                "api_secret": os.environ.get("EMAIL_API_SECRET", "default_insecure_secret_change_me_in_prod")
             }
             
             response = requests.post(proxy_url, json=payload, timeout=15)
