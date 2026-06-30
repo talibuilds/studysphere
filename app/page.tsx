@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Sparkles, Users, ClipboardCheck, BookOpen, Heart, Moon, Sun, ArrowRight, Flame } from "lucide-react"
+import { Sparkles, Users, ClipboardCheck, BookOpen, Heart, Moon, Sun, ArrowRight, Flame, Menu } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useTheme } from "@/app/providers"
@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import StudySessionCard from "@/components/study-session-card"
 import { sessionsAPI } from "@/lib/api"
 import { Card } from "@/components/ui/card"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 
 export default function LandingPage() {
   const { isDark, toggleTheme } = useTheme()
@@ -19,6 +20,7 @@ export default function LandingPage() {
   const [mounted, setMounted] = useState(false)
   const [popularSessions, setPopularSessions] = useState<any[]>([])
   const [loadingSessions, setLoadingSessions] = useState(true)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -57,11 +59,11 @@ export default function LandingPage() {
       </div>
       
       {/* Navigation */}
-      <nav className="absolute top-0 w-full z-50 pt-8 pb-4">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+      <nav className="absolute top-0 w-full z-50 pt-6 pb-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <Logo className="w-10 h-10" />
-            <span className="text-xl font-bold tracking-tight">StudySphere</span>
+            <Logo className="w-8 h-8 sm:w-10 sm:h-10" />
+            <span className="text-lg sm:text-xl font-bold tracking-tight">StudySphere</span>
           </Link>
           
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
@@ -71,7 +73,7 @@ export default function LandingPage() {
             <Link href="/leaderboard" className="hover:text-foreground transition-colors">Community</Link>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             {mounted && (
               <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full">
                 {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -82,6 +84,40 @@ export default function LandingPage() {
                 {isAuthenticated ? "Dashboard" : "Login"}
               </Button>
             </Link>
+          </div>
+
+          {/* Mobile Menu */}
+          <div className="flex md:hidden items-center gap-2">
+            {mounted && (
+              <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full">
+                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+            )}
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu size={24} />
+                  <span className="sr-only">Toggle Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] p-6 glass border-l border-border bg-background">
+                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                <div className="flex flex-col gap-6 mt-8">
+                  <Link href="/discover" className="text-lg font-medium hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>Explore</Link>
+                  <Link href="/discover" className="text-lg font-medium hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>Sessions</Link>
+                  <Link href="/study-groups" className="text-lg font-medium hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>Resources</Link>
+                  <Link href="/leaderboard" className="text-lg font-medium hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>Community</Link>
+                  
+                  <div className="pt-6 border-t border-border">
+                    <Link href={isAuthenticated ? "/dashboard" : "/auth"} onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full font-semibold" size="lg">
+                        {isAuthenticated ? "Dashboard" : "Login"}
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </nav>
@@ -214,50 +250,50 @@ export default function LandingPage() {
 
         {/* Stats Banner */}
         <div className="max-w-5xl mx-auto w-full mt-16 relative z-10">
-          <div className="glass rounded-2xl border border-border/50 p-6 md:p-8 flex flex-wrap md:flex-nowrap justify-between gap-6 md:gap-4 shadow-xl">
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              <div className="p-3 bg-primary/10 rounded-xl text-primary">
-                <Users size={24} />
+          <div className="glass rounded-2xl border border-border/50 p-6 md:p-8 grid grid-cols-2 md:flex md:flex-nowrap justify-between gap-6 md:gap-4 shadow-xl">
+            <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
+              <div className="p-2 md:p-3 bg-primary/10 rounded-xl text-primary shrink-0">
+                <Users size={20} className="md:w-6 md:h-6" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-foreground">500+</h3>
-                <p className="text-sm text-muted-foreground font-medium">Active Students</p>
+                <h3 className="text-xl md:text-2xl font-bold text-foreground">500+</h3>
+                <p className="text-xs md:text-sm text-muted-foreground font-medium">Active Students</p>
               </div>
             </div>
             
             <div className="hidden md:block w-px h-12 bg-border/50 self-center"></div>
             
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500">
-                <ClipboardCheck size={24} />
+            <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
+              <div className="p-2 md:p-3 bg-blue-500/10 rounded-xl text-blue-500 shrink-0">
+                <ClipboardCheck size={20} className="md:w-6 md:h-6" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-foreground">120+</h3>
-                <p className="text-sm text-muted-foreground font-medium">Study Sessions</p>
+                <h3 className="text-xl md:text-2xl font-bold text-foreground">120+</h3>
+                <p className="text-xs md:text-sm text-muted-foreground font-medium">Study Sessions</p>
               </div>
             </div>
             
             <div className="hidden md:block w-px h-12 bg-border/50 self-center"></div>
             
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              <div className="p-3 bg-purple-500/10 rounded-xl text-purple-500">
-                <BookOpen size={24} />
+            <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
+              <div className="p-2 md:p-3 bg-purple-500/10 rounded-xl text-purple-500 shrink-0">
+                <BookOpen size={20} className="md:w-6 md:h-6" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-foreground">50+</h3>
-                <p className="text-sm text-muted-foreground font-medium">Resources Shared</p>
+                <h3 className="text-xl md:text-2xl font-bold text-foreground">50+</h3>
+                <p className="text-xs md:text-sm text-muted-foreground font-medium">Resources Shared</p>
               </div>
             </div>
             
             <div className="hidden md:block w-px h-12 bg-border/50 self-center"></div>
             
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              <div className="p-3 bg-pink-500/10 rounded-xl text-pink-500">
-                <Heart size={24} />
+            <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
+              <div className="p-2 md:p-3 bg-pink-500/10 rounded-xl text-pink-500 shrink-0">
+                <Heart size={20} className="md:w-6 md:h-6" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-foreground">98%</h3>
-                <p className="text-sm text-muted-foreground font-medium">Satisfaction Rate</p>
+                <h3 className="text-xl md:text-2xl font-bold text-foreground">98%</h3>
+                <p className="text-xs md:text-sm text-muted-foreground font-medium">Satisfaction Rate</p>
               </div>
             </div>
           </div>

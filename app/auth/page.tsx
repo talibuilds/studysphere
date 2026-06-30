@@ -216,11 +216,11 @@ export default function AuthPage() {
       </div>
 
       {/* Right Side - Auth Form */}
-      <div className="w-full lg:w-1/3 flex items-center justify-center p-6 lg:p-12 relative z-10 bg-[#000000]">
-        <div className="w-full max-w-[480px] bg-[#0c0c0e] border border-white/5 rounded-[32px] p-10 lg:p-12 relative overflow-hidden">
+      <div className="w-full lg:w-1/3 flex items-center justify-center p-4 sm:p-6 lg:p-12 relative z-10 bg-[#000000]">
+        <div className="w-full max-w-[480px] bg-[#0c0c0e] border border-white/5 rounded-2xl sm:rounded-[32px] p-6 sm:p-10 lg:p-12 relative overflow-hidden">
           
-          <div className="space-y-1 mb-8 text-center sm:text-left">
-            <h2 className="text-3xl font-bold tracking-tight">
+          <div className="space-y-1 mb-6 sm:mb-8 text-center sm:text-left">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
               Welcome <span className="text-purple-500">back</span>
             </h2>
             <p className="text-sm text-slate-400">
@@ -324,7 +324,7 @@ export default function AuthPage() {
             {/* Register Tab */}
             <TabsContent value="register" className="animate-in fade-in-50 duration-500">
               <form onSubmit={handleRegister} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <Label htmlFor="first-name" className="text-slate-300 text-xs font-semibold ml-1">First Name</Label>
                     <Input
@@ -440,7 +440,7 @@ export default function AuthPage() {
 
       {/* Forgot Password Dialog */}
       <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
-        <DialogContent className="glass border-border max-w-md p-8 text-white">
+        <DialogContent className="glass border-border max-w-[95vw] sm:max-w-md p-6 sm:p-8 text-white rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold flex items-center gap-2">
               <Key className="text-primary h-5 w-5" />
