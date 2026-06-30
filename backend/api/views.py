@@ -410,6 +410,7 @@ class AdminViewSet(viewsets.ViewSet):
 class AdminUserViewSet(viewsets.ModelViewSet):
     """ViewSet for admin to manage users"""
     permission_classes = [IsAdminUser]
+    pagination_class = None
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserProfileSerializer
 
@@ -425,6 +426,7 @@ class AdminUserViewSet(viewsets.ModelViewSet):
 class AdminSessionViewSet(viewsets.ModelViewSet):
     """ViewSet for admin to manage sessions"""
     permission_classes = [IsAdminUser]
+    pagination_class = None
     queryset = StudySession.objects.all().order_by('-created_at')
     serializer_class = StudySessionSerializer
 
