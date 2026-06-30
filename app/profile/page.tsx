@@ -106,7 +106,12 @@ export default function ProfilePage() {
       alert("Password changed successfully!")
     } catch (err: any) {
       console.error("Failed to change password", err)
-      setPasswordError(err.response?.data?.old_password?.[0] || "Failed to change password.")
+      const errorData = err.response?.data;
+      const errorMessage = errorData?.new_password?.[0] 
+        || errorData?.old_password?.[0] 
+        || errorData?.detail 
+        || "Failed to change password.";
+      setPasswordError(errorMessage)
     } finally {
       setIsSavingPassword(false)
     }
