@@ -16,11 +16,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
     """Detailed user profile with badges and groups"""
     badges = serializers.SerializerMethodField()
     groups = serializers.SerializerMethodField()
+    has_usable_password = serializers.SerializerMethodField()
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'image', 'level', 'xp', 'is_staff', 'badges', 'groups', 'created_at']
-        read_only_fields = ['id', 'level', 'xp', 'is_staff', 'created_at']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'image', 'level', 'xp', 'is_staff', 'badges', 'groups', 'has_usable_password', 'created_at']
+        read_only_fields = ['id', 'level', 'xp', 'is_staff', 'has_usable_password', 'created_at']
+    
+    def get_has_usable_password(self, obj):
+        return obj.has_usable_password()
     
     def get_badges(self, obj):
         badges = obj.badges.all()

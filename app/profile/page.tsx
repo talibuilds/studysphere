@@ -223,7 +223,7 @@ export default function ProfilePage() {
                         {isSaving ? "Saving..." : "Save Changes"}
                       </Button>
                       <Button type="button" variant="outline" onClick={() => setIsPasswordDialogOpen(true)}>
-                        Change Password
+                        {profileData.has_usable_password ? "Change Password" : "Set Password"}
                       </Button>
                     </div>
                   </form>
@@ -233,20 +233,24 @@ export default function ProfilePage() {
               <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
-                    <DialogTitle>Change Password</DialogTitle>
+                    <DialogTitle>{profileData.has_usable_password ? "Change Password" : "Set Password"}</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handlePasswordSubmit} className="space-y-4 pt-4">
                     {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
-                    <div className="space-y-2">
-                      <Label htmlFor="old_password">Current Password</Label>
-                      <Input 
-                        id="old_password" 
-                        type="password"
-                        value={passwordData.old_password} 
-                        onChange={(e) => setPasswordData({...passwordData, old_password: e.target.value})} 
-                        required
-                      />
-                    </div>
+                    
+                    {profileData.has_usable_password && (
+                      <div className="space-y-2">
+                        <Label htmlFor="old_password">Current Password</Label>
+                        <Input 
+                          id="old_password" 
+                          type="password"
+                          value={passwordData.old_password} 
+                          onChange={(e) => setPasswordData({...passwordData, old_password: e.target.value})} 
+                          required
+                        />
+                      </div>
+                    )}
+                    
                     <div className="space-y-2">
                       <Label htmlFor="new_password">New Password</Label>
                       <Input 
@@ -258,7 +262,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <Button type="submit" className="w-full" disabled={isSavingPassword}>
-                      {isSavingPassword ? "Updating..." : "Update Password"}
+                      {isSavingPassword ? (profileData.has_usable_password ? "Updating..." : "Setting...") : (profileData.has_usable_password ? "Update Password" : "Set Password")}
                     </Button>
                   </form>
                 </DialogContent>

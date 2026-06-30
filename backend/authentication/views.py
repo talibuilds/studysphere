@@ -142,7 +142,7 @@ class GoogleLoginView(APIView):
                     email=email,
                     first_name=first_name,
                     last_name=last_name,
-                    password=User.objects.make_random_password()
+                    password=None
                 )
             
             # Generate JWT tokens
@@ -182,8 +182,13 @@ class ChangePasswordView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
 
         user = self.get_object()
-        if not user.check_password(serializer.validated_data.get("old_password")):
-            return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if user.has_usable_password():
+            old_password = serializer.validated_data.get("old_password")
+            if not old_password:
+                return Response({"old_password": ["Current password is required."]}, status=status.HTTP_400_BAD_REQUEST)
+            if not user.check_password(old_password):
+                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
             
         user.set_password(serializer.validated_data.get("new_password"))
         user.save()
@@ -203,10 +208,9 @@ class PasswordResetRequestView(APIView):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            # For security reasons, don't reveal if user exists or not
             return Response(
-                {"detail": "If your email is registered, we have sent a reset code."},
-                status=status.HTTP_200_OK
+                {"detail": "User not found. Please sign up."},
+                status=status.HTTP_404_NOT_FOUND
             )
 
         # Generate a 6-digit OTP code
