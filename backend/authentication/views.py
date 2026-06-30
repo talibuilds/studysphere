@@ -215,14 +215,34 @@ class PasswordResetRequestView(APIView):
         # Save to database
         PasswordResetOTP.objects.create(user=user, otp=otp)
 
-        # Send email (prints to console in local development)
-        send_mail(
-            subject='StudySphere - Password Reset Verification Code',
-            message=f'Hi {user.username},\n\nYour password reset verification code is: {otp}\n\nThis code will expire in 15 minutes.\n\nBest,\nStudySphere Team',
-            from_email=None,
-            recipient_list=[email],
-            fail_silently=False,
-        )
+        # Send email
+        try:
+            from django.conf import settings as django_settings
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Attempting to send OTP email to {email}")
+            logger.info(f"EMAIL_BACKEND: {django_settings.EMAIL_BACKEND}")
+            logger.info(f"EMAIL_HOST: {getattr(django_settings, 'EMAIL_HOST', 'NOT SET')}")
+            logger.info(f"EMAIL_HOST_USER: {getattr(django_settings, 'EMAIL_HOST_USER', 'NOT SET')}")
+            logger.info(f"DEFAULT_FROM_EMAIL: {getattr(django_settings, 'DEFAULT_FROM_EMAIL', 'NOT SET')}")
+
+            send_mail(
+                subject='StudySphere - Password Reset Verification Code',
+                message=f'Hi {user.username},\n\nYour password reset verification code is: {otp}\n\nThis code will expire in 15 minutes.\n\nBest,\nStudySphere Team',
+                from_email=None,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            logger.info(f"OTP email sent successfully to {email}")
+        except Exception as e:
+            import traceback
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send OTP email: {str(e)}")
+            logger.error(traceback.format_exc())
+            return Response(
+                {"detail": f"Email delivery failed: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
         return Response(
             {"detail": "If your email is registered, we have sent a reset code."},
