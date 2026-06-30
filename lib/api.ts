@@ -287,6 +287,31 @@ export const adminAPI = {
         const response = await apiClient.patch(`/admin/groups/${id}/reject/`);
         return response.data;
     },
+
+    deleteGroup: async (id: string) => {
+        const response = await apiClient.delete(`/admin/groups/${id}/`);
+        return response.data;
+    },
+
+    getUsers: async () => {
+        const response = await apiClient.get('/admin/users/');
+        return response.data;
+    },
+
+    deleteUser: async (id: string) => {
+        const response = await apiClient.delete(`/admin/users/${id}/`);
+        return response.data;
+    },
+
+    getSessions: async () => {
+        const response = await apiClient.get('/admin/sessions/');
+        return response.data;
+    },
+
+    deleteSession: async (id: string) => {
+        const response = await apiClient.delete(`/admin/sessions/${id}/`);
+        return response.data;
+    },
 };
 
 

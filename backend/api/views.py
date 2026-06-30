@@ -397,3 +397,38 @@ class AdminViewSet(viewsets.ViewSet):
             return Response({'detail': 'Group rejected'}, status=status.HTTP_200_OK)
         except StudyGroup.DoesNotExist:
             return Response({'detail': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def destroy(self, request, pk=None):
+        """Delete a group entirely"""
+        try:
+            group = StudyGroup.objects.get(pk=pk)
+            group.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except StudyGroup.DoesNotExist:
+            return Response({'detail': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class AdminUserViewSet(viewsets.ModelViewSet):
+    """ViewSet for admin to manage users"""
+    permission_classes = [IsAdminUser]
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserProfileSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        user = self.get_object()
+        if user == request.user:
+            return Response({'detail': 'Cannot delete yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        if user.is_superuser:
+            return Response({'detail': 'Cannot delete superuser'}, status=status.HTTP_400_BAD_REQUEST)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class AdminSessionViewSet(viewsets.ModelViewSet):
+    """ViewSet for admin to manage sessions"""
+    permission_classes = [IsAdminUser]
+    queryset = StudySession.objects.all().order_by('-created_at')
+    serializer_class = StudySessionSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        session = self.get_object()
+        session.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
